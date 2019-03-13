@@ -5,9 +5,7 @@
 #include "Funkcje.h"
 
 int main() {
-	printf("\033[0; 31m"); //Set the text to the color red
-	printf("Hello\n"); //Display Hello in red
-
+	
 
 
 
@@ -28,11 +26,15 @@ int main() {
 		}
 	} while (trybGry!= 0 && trybGry != 1);
 	system("cls");
-
+	
+	
 	int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA];
 	int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA];
+	Gracz gracz1 = {poleGracza1,20};
+	Gracz gracz2 = {poleGracza2,20};
 	
-	IniciujGre(poleGracza1, poleGracza2);
+	
+	IniciujGre(gracz1, gracz2);
 
 
 

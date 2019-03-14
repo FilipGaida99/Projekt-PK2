@@ -34,7 +34,7 @@ int main() {
 	Gracz gracz2 = {poleGracza2,20};
 	
 	
-	IniciujGre(gracz1, gracz2);
+	IniciujGre(gracz1, gracz2,1);
 
 
 

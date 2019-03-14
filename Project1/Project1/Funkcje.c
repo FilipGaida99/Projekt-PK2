@@ -10,6 +10,10 @@ void WyczyscBufor() {
 	} while (pozostalosc != '\n');
 }
 
+void Oczysc() {
+	system("cls");
+}
+
 void RysujPlansze(Gracz player, int dyskrecja) {
 	int i, j, c=0;
 	
@@ -72,7 +76,7 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek) {
 		if (y<0 || y>ROZMIAR_POLA || y + dlugosc > ROZMIAR_POLA)
 			return 0;
 		y -= 1;
-		for (i = 0; i <= dlugosc; i++) {
+		for (i = 0; i <= dlugosc +1; i++) {
 			if (y >= 0 && y < ROZMIAR_POLA) {
 				if (gracz->pole[x][y] < 0) {
 					return 0;
@@ -86,7 +90,7 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek) {
 			}
 			y++;
 		}
-		for (; i > 1; i--) {
+		for (y--; i > 2; i--) {
 			y--;
 			gracz->pole[x][y] = -3;
 		}
@@ -138,10 +142,18 @@ void IniciujGre(Gracz gracz1, Gracz gracz2, int trybGry) {
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 	PobierzKoordynaty(4, &gracz1);
 	if (trybGry == 1) {
-
+		Oczysc();
+		printf("Tura gracza drugiego. Nacisnij dowolny klawisz");
+		getchar();
+		Oczysc();
+		printf("Twoje Pole: \n");
+		RysujPlansze(gracz1, 0);
+		printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
+		PobierzKoordynaty(4, &gracz2);
 
 	}
 	else {
+		//TODO AI
 
 	}
 }

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <time.h>
+#include <string.h>
 #include "Funkcje.h"
 
 #include <Windows.h>
@@ -47,6 +49,8 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek) {
 	int x = pole / 10;
 	int y = pole % 10;
 	int i;
+	if (x<0 || x>ROZMIAR_POLA || y<0 || y>ROZMIAR_POLA)
+		return 0;
 	if (kierunek) {
 		if (x<0 || x>ROZMIAR_POLA || x + dlugosc > ROZMIAR_POLA)
 			return 0;
@@ -111,12 +115,29 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz) {
 			break;
 		case 2: printf("Ustaw dwumasztowiec:");
 			break;
-		case 1: printf("Ustaw jednomasztowiec:");
+		case 1: printf("Ustaw jednomasztowce (podaj tylko numery pola):");
 			break;
 		default: printf("blad");
 			break;
 		}
-
+		if (dlugosc == 1) {
+			for (i = 0; i < 4; i++) {
+				while (scanf("%d", &pole) != 1) {
+					printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola>");
+					WyczyscBufor();
+				};
+				if (UstawStatek(gracz,dlugosc,pole,0) == 0) {
+					printf("Nie mozna tu ustawic statku. Podaj ponownie\n");
+					WyczyscBufor();
+					i--;
+					continue;
+				}
+				system("cls");
+				RysujPlansze(*gracz, 0);
+			}
+			return;
+		
+		}
 		do {
 			while (scanf("%d %d", &pole, &kierunek) != 2) {
 				printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
@@ -134,26 +155,44 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz) {
 }
 
 
-void IniciujGre(Gracz gracz1, Gracz gracz2, int trybGry) {
+void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
 	int pole, kierunek;
-	WypelnijTablice(gracz1.pole,gracz2.pole);
+	gracz1->statki = gracz2->statki = 20;
+	WypelnijTablice(gracz1->pole,gracz2->pole);
 	printf("Twoje Pole: \n");
-	RysujPlansze(gracz1, 0);
+	RysujPlansze(*gracz1, 0);
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
-	PobierzKoordynaty(4, &gracz1);
+	PobierzKoordynaty(4, gracz1);
+	printf("Oto twoje ustawienie. Czy chcesz je zmienic?");
+	WyczyscBufor();
+	getchar();//TODO cofanie ruchu.
 	if (trybGry == 1) {
 		Oczysc();
 		printf("Tura gracza drugiego. Nacisnij dowolny klawisz");
 		getchar();
 		Oczysc();
 		printf("Twoje Pole: \n");
-		RysujPlansze(gracz1, 0);
+		RysujPlansze(*gracz2, 0);
 		printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
-		PobierzKoordynaty(4, &gracz2);
-
+		PobierzKoordynaty(4, gracz2);
+		Oczysc();
 	}
 	else {
-		//TODO AI
+		srand(time(0));
+		int pozycja =rand() % 100;
+		int kierunek = rand() % 2;
+		while(!UstawStatek(gracz2, 4, rand()%100, rand()%2));
+		while (!UstawStatek(gracz2, 3, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 3, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 2, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 2, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 2, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2));
+		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2));
+
+		Oczysc();
 
 	}
 }
@@ -170,3 +209,69 @@ void WypelnijTablice(int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA], int poleGracza
 
 	}
 }
+
+int Strzal(Gracz* atakowanyGracz, int pole) {
+	int x = pole / 10;
+	int y = pole % 10;
+	if (atakowanyGracz->pole[x][y] == -3) {
+		atakowanyGracz->pole[x][y] = -1;
+		return 1;
+	}
+	else if (atakowanyGracz->pole[x][y] < 0) {
+		return 0;
+	}
+	else {
+		atakowanyGracz->pole[x][y] = -2;
+		return 2;
+	}
+}
+
+int Bitwa(Gracz* gracz1, Gracz* gracz2) {
+	char rozkaz[7];
+	int cel;
+	printf("Oto twoje pole:\n");
+	RysujPlansze(*gracz1, 0);
+	printf("Oto plansza przeciwnika:\n");
+	RysujPlansze(*gracz2, 1);
+	while (1) {
+		printf("Wydaj rozkaz: ");
+		scanf("%6s", &rozkaz);
+		if (!strcmp(rozkaz, "cofnij")) {
+
+		}
+		else if (!strcmp(rozkaz, "strzel")) {
+			scanf("%d", &cel);
+			int wynik;
+			while ((wynik = Strzal(gracz2, cel)) == 0) {
+				printf("Juz tam celowano. Podaj ponownie:");
+				WyczyscBufor();
+				scanf("%d", &cel);
+			}
+			if (wynik == 1) {
+				printf("Trafiono!\n");
+				gracz2->statki -= 1;
+				if (gracz2->statki == 0) {
+					return 0;
+				}
+			}
+			if (wynik == 2) {
+				printf("Pudlo :(\n");
+				return 1;
+			}
+		}
+	}
+}
+
+int BitwaAI(Gracz* graczAI, Gracz* gracz2) {
+	int cel;
+	do {
+		if (gracz2->statki == 0) {
+			return 0;
+		}
+		printf("Strzelil, nie pudlo");
+	 cel = rand() % 100;
+	} while (Strzal(gracz2, cel) != 2);
+	return 1;
+}
+
+

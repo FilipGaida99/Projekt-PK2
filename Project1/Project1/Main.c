@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #include "Funkcje.h"
 
 int main() {
-	
-
-
 
 	int trybGry;
 	printf("Witaj w grze w statki. Nacisnij dowolny klawisz aby rozpoczac.\n");
@@ -27,18 +23,44 @@ int main() {
 	} while (trybGry!= 0 && trybGry != 1);
 	system("cls");
 	
-	
 	int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA];
 	int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA];
-	Gracz gracz1 = {poleGracza1,20};
-	Gracz gracz2 = {poleGracza2,20};
+
+	Gracz gracz1 = { poleGracza1,20 };
+	Gracz gracz2 = { poleGracza2,20 };
 	
 	
-	IniciujGre(gracz1, gracz2,1);
+
+	IniciujGre(&gracz1, &gracz2,trybGry);
+
+	if (trybGry == 1) {
+		int wynik1, wynik2;
+		do {
+			
+			Oczysc();
+			printf("Tura gracza pierwszego. Nacisnij dowolny klawisz.\n");
+			WyczyscBufor();
+			getchar();
+			wynik1=Bitwa(&gracz1, &gracz2);
+			Oczysc();
+			printf("Tura gracza drugiego. Nacisnij dowolny klawisz.\n");
+			WyczyscBufor();
+			getchar();
+			wynik2 = Bitwa(&gracz2, &gracz1);
+
+		} while (wynik1 && wynik2);
+	}
+	if (trybGry == 0) {
+		int wynik1,wynik2;
+		do {
+			wynik1 = Bitwa(&gracz1, &gracz2);
+			wynik2 = BitwaAI(&gracz2, &gracz1);
+		} while (wynik1 && wynik2);
+	}
 
 
 
-	while (0==0)
+	while (1)
 	{
 		getchar();
 	}

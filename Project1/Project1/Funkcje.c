@@ -134,6 +134,41 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajSta
 	}
 }
 
+int UsunStatek(Historia** historia, Gracz* gracz) {
+	Historia* temp = *historia;
+	if (temp->zadanie == ustaw){
+		int dlugosc, pole, kierunek, i, x, y;
+		//odszyfrowanie danych z struktury
+		dlugosc = temp->argument / 10000;
+		pole = (temp->argument % 10000) / 100;
+		kierunek = temp->argument % 100;
+		x = pole / 10;
+		y = pole % 10;
+
+		for (i = 0; i < dlugosc; i++) {
+			gracz->pole[x][y] = x * 10 + y;
+
+			if (kierunek) {
+				x++;
+			}
+			else {
+				y++;
+			}
+		}
+
+
+
+		free(*historia);
+		return 1;
+	}
+	if (temp->zadanie == start) {
+		return 0;
+	}
+	printf("Debug error");
+
+}
+
+
 void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 	int i, j, dane, rodzaj;
 	i = 4 - dlugosc;
@@ -175,6 +210,10 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 		}
 		do {
 			dane = WprowadzZadanie(2);
+			if (dane == -3) {
+				UsunStatek(historia, gracz);
+				RysujPlansze(*gracz, 0);
+			}
 			while (dane==-1) {
 				printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
 				dane = WprowadzZadanie(2);
@@ -183,7 +222,7 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 		rodzaj++;
 		printf("\n");
 		RysujPlansze(*gracz, 0);
-		DodajdoListy(historia, ustaw, dlugosc * 1000 + dane / 100);
+		DodajdoListy(historia, ustaw, dlugosc * 10000 + dane);
 	
 		}
 			dlugosc--;
@@ -227,9 +266,13 @@ void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
 	RysujPlansze(*gracz1, 0);
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 	PobierzKoordynaty(4, gracz1,&historia);
-	printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, nacisnij enter");
+	printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"restart\"\nJezeli nie, wprowadz dowolny znak");
 	WyczyscBufor();
-	WprowadzZadanie(0);
+	int komenda;
+	do {
+		komenda = WprowadzZadanie(1);
+	} while (komenda == -1);
+	
 	
 
 	if (trybGry == 1) {

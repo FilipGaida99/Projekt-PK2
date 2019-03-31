@@ -5,10 +5,11 @@
 
 #include <Windows.h>
 
-Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument) {
+Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodzaj) {
 	Historia* temp = (Historia*)malloc(sizeof(Historia));
 	temp->zadanie = zadanie;
 	temp->argument = argument;
+	temp->rodzaj = rodzaj;
 	temp->pPoprzednia = *lista;
 	*lista = temp;
 	
@@ -155,10 +156,23 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 				y++;
 			}
 		}
+		//TODO przeniesc to do niezale¿nej fukcji bo sie powtarza
+		printf("Teraz ustaw usuniety statek ponownie:");
+		int dane;
+		do {
+			dane = WprowadzZadanie(2);
+			if (dane == -3) {
+				UsunStatek(&temp->pPoprzednia, gracz);
+				RysujPlansze(*gracz, 0);
+			}
+			while (dane == -1) {
+				printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
+				dane = WprowadzZadanie(2);
+			}
+		} while (UstawStatek(gracz, dlugosc, dane / 100, dane % 100,temp->rodzaj) == 0 && printf("Nie mozna tu ustawic statku. Podaj ponownie: "));
+		temp->argument = dlugosc * 10000 + dane;
+		*historia = temp;
 
-
-
-		free(*historia);
 		return 1;
 	}
 	if (temp->zadanie == start) {
@@ -202,7 +216,7 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 				} while (UstawStatek(gracz, dlugosc, dane / 100, 0,-3) == 0 && printf("Nie mozna tu ustawic statku. Podaj ponownie: "));
 				printf("\n");
 				RysujPlansze(*gracz, 0);
-				DodajdoListy(historia, ustaw, dlugosc * 1000 + dane / 100);
+				DodajdoListy(historia, ustaw, dlugosc * 10000 + dane,-3);
 
 			}
 			return;
@@ -219,11 +233,10 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 				dane = WprowadzZadanie(2);
 			}
 		} while (UstawStatek(gracz, dlugosc, dane/100, dane%100,rodzaj) == 0 && printf("Nie mozna tu ustawic statku. Podaj ponownie: "));
+		DodajdoListy(historia, ustaw, dlugosc * 10000 + dane, rodzaj);
 		rodzaj++;
 		printf("\n");
 		RysujPlansze(*gracz, 0);
-		DodajdoListy(historia, ustaw, dlugosc * 10000 + dane);
-	
 		}
 			dlugosc--;
 			i= 4-dlugosc;
@@ -255,9 +268,11 @@ int WprowadzZadanie(int liczbaArgumentow) {
 }
 
 
+
+
 void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
 	Historia* historia = 0;
-	DodajdoListy(&historia, start, 0);
+	DodajdoListy(&historia, start, 0,0);
 	int pole, kierunek;
 	gracz1->statki = gracz2->statki = 04332224;
 	printf("%d", gracz2->statki);
@@ -351,14 +366,14 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 			break;
 		}
 		atakowanyGracz->pole[x][y] = -1;
-		printf("Pozycja: %o/n Wartosc: %d\n", pozycja, (atakowanyGracz->statki / pozycja) % 8);
+		
 		if (((atakowanyGracz->statki / pozycja) % 8 == 0) || pozycja== 01) {
 			return 3;
 		}
 		return 2;
 	}
 	else if (atakowanyGracz->pole[x][y] < 0) {
-		return 0;
+		return 0; 
 	}
 	else {
 		atakowanyGracz->pole[x][y] = -2; //pudlo
@@ -388,9 +403,9 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2) {
 		printf("\n%o\n", gracz2->statki);
 		if (wynik > 1) {
 			if (wynik == 2)
-				printf("Trafiono!\n");
+				printf("Trafiony!\n");
 			else
-				printf("Trafiony zatopiony!");
+				printf("Trafiony zatopiony!\n");
 			
 			RysujPlansze(*gracz2,1);
 			if (gracz2->statki == 0) {
@@ -406,16 +421,98 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2) {
 	}
 }
 
-int BitwaAI(Gracz* graczAI, Gracz* gracz2) {
+int Losuj(int poprzedniePole) {
+	return rand() % 100;
+}
+
+int IdzN(int poprzedniePole) {
+	int tymczasowa = poprzedniePole - 10;
+	if (tymczasowa / 10 < 0) {
+		return -1;
+	}
+	return tymczasowa;
+
+}
+int IdzS(int poprzedniePole) {
+	int tymczasowa = poprzedniePole + 10;
+	if (tymczasowa / 10 >= ROZMIAR_POLA) {
+		return -1;
+	}
+	return tymczasowa;
+}
+int IdzSkos(int poprzedniePole) {
+	int tymczasowa = poprzedniePole + 11;
+	if (tymczasowa / 10 >= ROZMIAR_POLA || tymczasowa % 10 >= ROZMIAR_POLA) {
+		return -1;
+	}
+	return tymczasowa;
+}
+int IdzE(int poprzedniePole) {
+	int tymczasowa = poprzedniePole + 1;
+	if (tymczasowa % 10 >= ROZMIAR_POLA) {
+		return -1;
+	}
+	return tymczasowa;
+
+}
+int IdzW(int poprzedniePole) {
+	int tymczasowa = poprzedniePole - 1;
+	if (tymczasowa % 10 < 0) {
+		return -1;
+	}
+	return tymczasowa;
+}
+
+
+
+int CelowanieAI(Gracz* atakowanyGracz, Wybor* AI) {
+	int wynik, cel;
+	do {
+		do{
+			cel = AI->stan[AI->stanPoprzedni](AI->aktualnePole);
+			AI->aktualnePole = cel;
+
+		} while (cel == -1 && AI->stanPoprzedni++);
+		wynik = Strzal(atakowanyGracz, cel);
+		
+		if (atakowanyGracz->statki == 0) {
+			return 0;
+		}
+		
+		if (wynik == 3) {//statek zosta³ zatopiony po strzle
+			AI->stanPoprzedni = 0;
+		}
+		if (wynik == 1 && AI->stanPoprzedni==4 ) {
+			AI->stanPoprzedni++;
+		}
+		
+		if (AI->stanPoprzedni == 0) {
+			if (wynik == 2) {//trafiono, spróbuj znaleŸæ resztê statku
+				AI->stanPoprzedni++;
+			}
+
+		}
+		else {
+			if (wynik == 1) { //podczas szukania zmienia siê kierunek tylko podczas nietrafienia
+				AI->stanPoprzedni++;
+			}
+		}
+	} while (wynik != 1);
+	return 1;
+}
+/*
+int BitwaAI(Gracz* graczAI, Gracz* gracz2, Wybor* AI) {
 	int cel;
 	do {
+
 		if (gracz2->statki == 0) {
 			return 0;
 		}
 		
-	 cel = rand() % 100;
+
 	} while (Strzal(gracz2, cel) != 1);
 	return 1;
 }
+*/
 
 

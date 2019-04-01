@@ -8,6 +8,7 @@
 int main() {
 	ZmienKolor(BIALY);
 
+	Zapisz();
 
 	int trybGry;
 	printf("Witaj w grze w statki. Nacisnij dowolny klawisz aby rozpoczac.\n");
@@ -62,14 +63,14 @@ int main() {
 		AI.stan[1] = IdzS;
 		AI.stan[2] = IdzN;
 		AI.stan[3] = IdzSkos;
-		AI.stan[4] = IdzE;
-		AI.stan[5] = IdzW;
+		AI.stan[4] = IdzW;
+		AI.stan[5] = IdzE;
 		AI.stanPoprzedni = 0;
 
 
 		do {
 			wynik1 = Bitwa(&gracz1, &gracz2);
-			wynik2 = CelowanieAI(&gracz1,&AI);
+			wynik2 = BitwaAI(&gracz1,&AI);
 		} while (wynik1 && wynik2);
 	}
 	if (wynik1 == 0) {

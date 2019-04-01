@@ -38,7 +38,6 @@ void RysujPlansze(Gracz gracz, int dyskrecja);
 void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry);
 void WypelnijTablice(int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA], int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA]);
 int Bitwa(Gracz* gracz1, Gracz* gracz2);
-int BitwaAI(Gracz* gracz1, Gracz* gracz2, Wybor* AI);
 void Oczysc();
 void ZmienKolor(int typ);
 Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodzaj);
@@ -51,7 +50,9 @@ int IdzE(int poprzedniePole);
 int IdzW(int poprzedniePole);
 int IdzSkos(int poprzedniePole);
 
-int CelowanieAI(Gracz* atakowanyGracz, Wybor* AI);
+int BitwaAI(Gracz* atakowanyGracz, Wybor* AI);
+
+int Zapisz();
 
 
 #endif // !FUNKCJE_H

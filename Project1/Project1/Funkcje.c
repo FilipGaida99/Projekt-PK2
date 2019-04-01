@@ -4,6 +4,43 @@
 #include "Funkcje.h"
 
 #include <Windows.h>
+#include <mxml.h>
+
+
+int Zapisz() {
+	mxml_node_t *xml;
+	mxml_node_t *dane;
+	mxml_node_t *wartosc;
+	xml = mxmlNewXML("1.0");
+		dane = mxmlNewElement(xml, "Ustawienia");
+			wartosc = mxmlNewElement(dane, "Tryb_Gry");
+			mxmlNewInteger(wartosc, 0);
+			wartosc = mxmlNewElement(dane, "Tura");
+			mxmlNewInteger(wartosc, 0);
+			wartosc = mxmlNewElement(dane, "Czyja_Tura");
+			mxmlNewInteger(wartosc, 0);
+		dane = mxmlNewElement(xml, "Gracz1");
+			wartosc= mxmlNewElement(dane, "Statki");
+			mxmlNewInteger(wartosc, 0);
+			wartosc = mxmlNewElement(dane, "Pole");
+			int i;
+			for (i = 0; i < ROZMIAR_POLA*ROZMIAR_POLA; i++) {
+				if (i == 44) {
+				mxmlNewInteger(wartosc, -3);
+				continue;
+				}
+
+				mxmlNewInteger(wartosc, i);
+			}
+
+	FILE *fp;
+
+	fp = fopen("Zapis.xml", "w");
+	mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
+	fclose(fp);
+
+}
+
 
 Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodzaj) {
 	Historia* temp = (Historia*)malloc(sizeof(Historia));
@@ -465,10 +502,13 @@ int IdzW(int poprzedniePole) {
 
 
 
-int CelowanieAI(Gracz* atakowanyGracz, Wybor* AI) {
+int BitwaAI(Gracz* atakowanyGracz, Wybor* AI) {
 	int wynik, cel;
 	do {
 		do{
+			if (AI->stanPoprzedni > 5) { //przechwytywanie osobliwych b³êdów w celowaniu
+				AI->stanPoprzedni = 0;
+			}
 			cel = AI->stan[AI->stanPoprzedni](AI->aktualnePole);
 			AI->aktualnePole = cel;
 
@@ -481,9 +521,11 @@ int CelowanieAI(Gracz* atakowanyGracz, Wybor* AI) {
 		
 		if (wynik == 3) {//statek zosta³ zatopiony po strzle
 			AI->stanPoprzedni = 0;
+			continue;
 		}
-		if (wynik == 1 && AI->stanPoprzedni==4 ) {
+		if (wynik == 2 && AI->stanPoprzedni==3 ) { // gdy celowano na skos i trafiono odrazu przechodzi siê do nastêpnego
 			AI->stanPoprzedni++;
+			continue;
 		}
 		
 		if (AI->stanPoprzedni == 0) {
@@ -493,6 +535,7 @@ int CelowanieAI(Gracz* atakowanyGracz, Wybor* AI) {
 
 		}
 		else {
+
 			if (wynik == 1) { //podczas szukania zmienia siê kierunek tylko podczas nietrafienia
 				AI->stanPoprzedni++;
 			}
@@ -500,19 +543,4 @@ int CelowanieAI(Gracz* atakowanyGracz, Wybor* AI) {
 	} while (wynik != 1);
 	return 1;
 }
-/*
-int BitwaAI(Gracz* graczAI, Gracz* gracz2, Wybor* AI) {
-	int cel;
-	do {
-
-		if (gracz2->statki == 0) {
-			return 0;
-		}
-		
-
-	} while (Strzal(gracz2, cel) != 1);
-	return 1;
-}
-*/
-
 

@@ -77,7 +77,12 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>C:\Users\Ja\source\repos\Projekt-PK2\Project1\Project1\mxml-3.0</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Users\Ja\source\repos\Projekt-PK2\Project1\Project1\mxml-3.0</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mxml1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

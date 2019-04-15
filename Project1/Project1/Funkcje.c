@@ -5,13 +5,14 @@
 
 #include <Windows.h>
 
-#include <mxml.h>
+//#include <mxml.h>
+#include "mxml-3.0/mxml.h"
 
-
-int Zapisz(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
+int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	mxml_node_t *xml;
 	mxml_node_t *dane;
 	mxml_node_t *wartosc;
+	mxml_node_t *element;
 	xml = mxmlNewXML("1.0");
 		dane = mxmlNewElement(xml, "Ustawienia");
 			wartosc = mxmlNewElement(dane, "Tryb_Gry");
@@ -26,8 +27,10 @@ int Zapisz(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node
 			wartosc = mxmlNewElement(dane, "Pole");
 			int i,j;
 			for (i = 0; i < ROZMIAR_POLA; i++) {
-				for(j=0; j<ROZMIAR_POLA;j++)
-					mxmlNewInteger(wartosc,gracz1.pole[i][j]);
+				for (j = 0; j < ROZMIAR_POLA; j++) {
+					element = mxmlNewElement(wartosc, "Wartosc");
+					mxmlNewInteger(element, gracz1.pole[i][j]);
+				}
 			}
 		dane = mxmlNewElement(xml, "Gracz2");
 			wartosc = mxmlNewElement(dane, "Statki");
@@ -35,8 +38,10 @@ int Zapisz(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node
 			wartosc = mxmlNewElement(dane, "Pole");
 			
 			for (i = 0; i < ROZMIAR_POLA; i++) {
-				for (j = 0; j<ROZMIAR_POLA; j++)
+				for (j = 0; j < ROZMIAR_POLA; j++) {
+					element = mxmlNewElement(wartosc, "Wartosc");
 					mxmlNewInteger(wartosc, gracz2.pole[i][j]);
+				}
 			}
 
 	*drzewo = xml;
@@ -47,21 +52,74 @@ int Zapisz(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node
 	fclose(fp);
 
 }
-int Wczytaj() {
+
+int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
+	mxml_node_t *dane;
+	mxml_node_t *wartosc;
+	int czyja;
+	dane = mxmlFindPath(*xml, "Ustawienia/Czyja_Tura");
+	czyja = mxmlGetInteger(dane);
+	if (czyja == 2) {
+		Gracz tymczasowa = gracz1;
+		gracz1 = gracz2;
+		gracz2 = tymczasowa;
+	}
+	dane = mxmlFindPath(*xml, "Gracz1");
+	wartosc = mxmlGetFirstChild(dane);
+	mxmlSetInteger(wartosc, gracz1.statki);
+	dane = mxmlFindPath(dane, "Pole");
+	wartosc = mxmlGetFirstChild(dane);
+	int i,j;
+	for (i = 0; i < ROZMIAR_POLA; i++) {
+		for (j = 0; j < ROZMIAR_POLA; j++) {
+			mxmlSetInteger(wartosc, gracz1.pole[i][j]);
+			wartosc = mxmlWalkNext(wartosc, dane, MXML_DESCEND);
+		}
+	}
+
+
+	dane = mxmlFindPath(*xml, "Gracz2");
+	wartosc = mxmlGetFirstChild(dane);
+	mxmlSetInteger(wartosc, gracz2.statki);
+	dane = mxmlFindPath(dane, "Pole");
+	wartosc = mxmlGetFirstChild(dane);
+	int i, j;
+	for (i = 0; i < ROZMIAR_POLA; i++) {
+		for (j = 0; j < ROZMIAR_POLA; j++) {
+			mxmlSetInteger(wartosc, gracz2.pole[i][j]);
+			wartosc = mxmlWalkNext(wartosc, dane, MXML_DESCEND);
+		}
+	}
+	FILE *fp;
+
+	fp = fopen("Zapis.xml", "w");
+	if (fp) {
+		mxmlSaveFile(*xml, fp, MXML_NO_CALLBACK);
+		printf("\n udany zapis \n");
+	}
+	fclose(fp);
+
+}
+
+int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml) {
 	FILE *plik;
 	mxml_node_t *drzewo;
+	mxml_node_t *dane;
+	mxml_node_t *wartosc;
 
 	plik = fopen("Zapis.xml", "r");
 	if (plik == 0) {
 		return 0;
 	}
-	drzewo = mxmlLoadFile(NULL, plik, MXML_INTEGER_CALLBACK);
+	drzewo = mxmlLoadFile(NULL, plik, MXML_NO_CALLBACK);
 	if (drzewo == 0) {
 		return 0;
 	}
-
-
-	mxml_node_t *zwracana = mxmlFindPath(drzewo, "Gracz1/Statki");
+	mxmlDelete(*xml);
+	*xml = drzewo;
+	dane = mxmlFindPath(drzewo, "Gracz1/Statki");
+	gracz1->statki = mxmlGetInteger(dane);
+	
 	return 1;
 }
 
@@ -446,11 +504,10 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 	}
 }
 
-int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t* xml, int tura, int czyja, int trybGry) {
+int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml) {
 	char rozkaz[7];
 	int cel;
 
-	printf("Tura: %d \n", tura);
 	printf("Oto twoje pole:\n");
 	RysujPlansze(*gracz1, 0);
 	printf("Oto plansza przeciwnika:\n");
@@ -465,22 +522,7 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t* xml, int tura, int czyja, i
 			do {
 				cel = WprowadzZadanie(1);
 				if (cel == -4) {
-					mxml_node_t* dane;
-					dane = mxmlFindPath(xml, "Ustawienia/Tryb_Gry");
-					mxmlSetInteger(dane, trybGry);
-					dane = mxmlWalkNext(dane, xml, 1);
-					mxmlSetInteger(dane, tura);
-					dane = mxmlWalkNext(dane, xml, 1);
-					mxmlSetInteger(dane, czyja);
-					dane = mxmlFindPath(xml, "Gracz1/Statki");
-					mxmlSetInteger(dane, gracz1->statki);
-					dane = mxmlWalkNext(dane, xml, 1);
-
-					FILE *fp;
-
-					fp = fopen("Zapis.xml", "w");
-					mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
-					fclose(fp);
+					Zapisz(*gracz1, *gracz2, xml);
 				}
 			} while (cel == -1);
 			wynik = Strzal(gracz2, cel / 100);

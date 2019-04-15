@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #include "Funkcje.h"
-#include <mxml.h>
-
+//#include <mxml.h>
+#include "mxml-3.0/mxml.h"
 
 int main() {
 	ZmienKolor(BIALY);
@@ -38,23 +38,30 @@ int main() {
 	
 	IniciujGre(&gracz1, &gracz2,trybGry);
 	mxml_node_t* xml;
-	Zapisz(trybGry, 0, 1, gracz1, gracz2,&xml);
-	Wczytaj();
+	mxml_node_t* tura_n;
+	mxml_node_t* czyja_n;
+	int tura = 1;
+	UtworzZapis(trybGry, 0, 1, gracz1, gracz2,&xml);
+	tura_n = mxmlFindPath(xml, "Ustawienia/Tura");
+	czyja_n = mxmlFindPath(xml, "Ustawienia/Czyja_Tura");
+	//Wczytaj();
 	int wynik1, wynik2;
 	if (trybGry == 1) {
-		int tura = 1;
 		do {
 			
 			Oczysc();
+			mxmlSetInteger(czyja_n, 1);
 			printf("Tura gracza pierwszego. Nacisnij dowolny klawisz.\n");
 			WyczyscBufor();
-			getchar();
-			wynik1=Bitwa(&gracz1, &gracz2,xml,tura,1,trybGry);
+			printf("Tura: %d \n", tura);
+			wynik1=Bitwa(&gracz1, &gracz2,&xml);
 			Oczysc();
+			mxmlSetInteger(czyja_n, 2);
 			printf("Tura gracza drugiego. Nacisnij dowolny klawisz.\n");
 			WyczyscBufor();
-			getchar();
-			wynik2 = Bitwa(&gracz2, &gracz1,xml, tura++,2, trybGry);
+			printf("Tura: %d \n", tura);
+			wynik2 = Bitwa(&gracz2, &gracz1,&xml);
+			mxmlSetInteger(tura_n, ++tura);
 
 		} while (wynik1 && wynik2);
 	}
@@ -69,11 +76,10 @@ int main() {
 		AI.stan[5] = IdzE;
 		AI.stanPoprzedni = 0;
 
-		int tura = 1;
 		do {
-			wynik1 = Bitwa(&gracz1, &gracz2, xml, tura, 1, trybGry);
+			wynik1 = Bitwa(&gracz1, &gracz2, &xml);
 			wynik2 = BitwaAI(&gracz1,&AI);
-			tura++;
+			mxmlSetInteger(tura_n, ++tura);
 		} while (wynik1 && wynik2);
 	}
 	if (wynik1 == 0) {

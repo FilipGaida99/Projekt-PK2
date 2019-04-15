@@ -2,6 +2,7 @@
 #define FUNKCJE_H
 
 #include <stdio.h>
+#include <mxml.h>
 
 
 #define ROZMIAR_POLA 10
@@ -37,7 +38,7 @@ void WyczyscBufor();
 void RysujPlansze(Gracz gracz, int dyskrecja);
 void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry);
 void WypelnijTablice(int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA], int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA]);
-int Bitwa(Gracz* gracz1, Gracz* gracz2);
+int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t* xml, int tura, int czyja, int trybGry);
 void Oczysc();
 void ZmienKolor(int typ);
 Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodzaj);
@@ -52,8 +53,8 @@ int IdzSkos(int poprzedniePole);
 
 int BitwaAI(Gracz* atakowanyGracz, Wybor* AI);
 
-int Zapisz();
-
+int Zapisz(int trybGry, int tura, int czyja, Gracz gracz1, Gracz gracz2, mxml_node_t** xml);
+int Wczytaj();
 
 #endif // !FUNKCJE_H
 

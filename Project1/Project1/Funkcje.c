@@ -4,41 +4,65 @@
 #include "Funkcje.h"
 
 #include <Windows.h>
+
 #include <mxml.h>
 
 
-int Zapisz() {
+int Zapisz(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	mxml_node_t *xml;
 	mxml_node_t *dane;
 	mxml_node_t *wartosc;
 	xml = mxmlNewXML("1.0");
 		dane = mxmlNewElement(xml, "Ustawienia");
 			wartosc = mxmlNewElement(dane, "Tryb_Gry");
-			mxmlNewInteger(wartosc, 0);
+			mxmlNewInteger(wartosc, trybGry);
 			wartosc = mxmlNewElement(dane, "Tura");
-			mxmlNewInteger(wartosc, 0);
+			mxmlNewInteger(wartosc, tura);
 			wartosc = mxmlNewElement(dane, "Czyja_Tura");
-			mxmlNewInteger(wartosc, 0);
+			mxmlNewInteger(wartosc, czyja);
 		dane = mxmlNewElement(xml, "Gracz1");
 			wartosc= mxmlNewElement(dane, "Statki");
-			mxmlNewInteger(wartosc, 0);
+			mxmlNewInteger(wartosc, gracz1.statki);
 			wartosc = mxmlNewElement(dane, "Pole");
-			int i;
-			for (i = 0; i < ROZMIAR_POLA*ROZMIAR_POLA; i++) {
-				if (i == 44) {
-				mxmlNewInteger(wartosc, -3);
-				continue;
-				}
-
-				mxmlNewInteger(wartosc, i);
+			int i,j;
+			for (i = 0; i < ROZMIAR_POLA; i++) {
+				for(j=0; j<ROZMIAR_POLA;j++)
+					mxmlNewInteger(wartosc,gracz1.pole[i][j]);
+			}
+		dane = mxmlNewElement(xml, "Gracz2");
+			wartosc = mxmlNewElement(dane, "Statki");
+			mxmlNewInteger(wartosc, gracz2.statki);
+			wartosc = mxmlNewElement(dane, "Pole");
+			
+			for (i = 0; i < ROZMIAR_POLA; i++) {
+				for (j = 0; j<ROZMIAR_POLA; j++)
+					mxmlNewInteger(wartosc, gracz2.pole[i][j]);
 			}
 
+	*drzewo = xml;
 	FILE *fp;
 
 	fp = fopen("Zapis.xml", "w");
 	mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
 	fclose(fp);
 
+}
+int Wczytaj() {
+	FILE *plik;
+	mxml_node_t *drzewo;
+
+	plik = fopen("Zapis.xml", "r");
+	if (plik == 0) {
+		return 0;
+	}
+	drzewo = mxmlLoadFile(NULL, plik, MXML_INTEGER_CALLBACK);
+	if (drzewo == 0) {
+		return 0;
+	}
+
+
+	mxml_node_t *zwracana = mxmlFindPath(drzewo, "Gracz1/Statki");
+	return 1;
 }
 
 
@@ -291,6 +315,10 @@ int WprowadzZadanie(int liczbaArgumentow) {
 		printf("\nproba cofania");
 		return -3;
 	}
+	if (!strcmp(buffor, "zapisz")) {
+		printf("\nproba zapisu");
+		return -4;
+	}
 	if (!strcmp(buffor, "restart")) {
 		printf("\nproba restartu");
 		return -2;
@@ -418,9 +446,11 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 	}
 }
 
-int Bitwa(Gracz* gracz1, Gracz* gracz2) {
+int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t* xml, int tura, int czyja, int trybGry) {
 	char rozkaz[7];
 	int cel;
+
+	printf("Tura: %d \n", tura);
 	printf("Oto twoje pole:\n");
 	RysujPlansze(*gracz1, 0);
 	printf("Oto plansza przeciwnika:\n");
@@ -434,6 +464,24 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2) {
 		do {
 			do {
 				cel = WprowadzZadanie(1);
+				if (cel == -4) {
+					mxml_node_t* dane;
+					dane = mxmlFindPath(xml, "Ustawienia/Tryb_Gry");
+					mxmlSetInteger(dane, trybGry);
+					dane = mxmlWalkNext(dane, xml, 1);
+					mxmlSetInteger(dane, tura);
+					dane = mxmlWalkNext(dane, xml, 1);
+					mxmlSetInteger(dane, czyja);
+					dane = mxmlFindPath(xml, "Gracz1/Statki");
+					mxmlSetInteger(dane, gracz1->statki);
+					dane = mxmlWalkNext(dane, xml, 1);
+
+					FILE *fp;
+
+					fp = fopen("Zapis.xml", "w");
+					mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
+					fclose(fp);
+				}
 			} while (cel == -1);
 			wynik = Strzal(gracz2, cel / 100);
 		}while (wynik == 0 && printf("W te pole nie mozna wycelowac. Podaj ponownie:") );

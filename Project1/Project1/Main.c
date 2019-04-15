@@ -2,14 +2,13 @@
 #include <stdlib.h>
 
 #include "Funkcje.h"
-
+#include <mxml.h>
 
 
 int main() {
 	ZmienKolor(BIALY);
 
-	Zapisz();
-
+	
 	int trybGry;
 	printf("Witaj w grze w statki. Nacisnij dowolny klawisz aby rozpoczac.\n");
 	getchar();
@@ -38,21 +37,24 @@ int main() {
 	
 	
 	IniciujGre(&gracz1, &gracz2,trybGry);
+	mxml_node_t* xml;
+	Zapisz(trybGry, 0, 1, gracz1, gracz2,&xml);
+	Wczytaj();
 	int wynik1, wynik2;
 	if (trybGry == 1) {
-		
+		int tura = 1;
 		do {
 			
 			Oczysc();
 			printf("Tura gracza pierwszego. Nacisnij dowolny klawisz.\n");
 			WyczyscBufor();
 			getchar();
-			wynik1=Bitwa(&gracz1, &gracz2);
+			wynik1=Bitwa(&gracz1, &gracz2,xml,tura,1,trybGry);
 			Oczysc();
 			printf("Tura gracza drugiego. Nacisnij dowolny klawisz.\n");
 			WyczyscBufor();
 			getchar();
-			wynik2 = Bitwa(&gracz2, &gracz1);
+			wynik2 = Bitwa(&gracz2, &gracz1,xml, tura++,2, trybGry);
 
 		} while (wynik1 && wynik2);
 	}
@@ -67,10 +69,11 @@ int main() {
 		AI.stan[5] = IdzE;
 		AI.stanPoprzedni = 0;
 
-
+		int tura = 1;
 		do {
-			wynik1 = Bitwa(&gracz1, &gracz2);
+			wynik1 = Bitwa(&gracz1, &gracz2, xml, tura, 1, trybGry);
 			wynik2 = BitwaAI(&gracz1,&AI);
+			tura++;
 		} while (wynik1 && wynik2);
 	}
 	if (wynik1 == 0) {

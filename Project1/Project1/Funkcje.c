@@ -8,6 +8,22 @@
 //#include <mxml.h>
 #include "mxml-3.0/mxml.h"
 
+const char* callback(mxml_node_t* node, int gdzie) {
+	const char* element;
+
+	element = mxmlGetElement(node);
+	if (!strcmp(element, "Wartosc")) {
+		return ("\n");
+	}
+
+
+	if (gdzie == MXML_WS_BEFORE_OPEN || gdzie == MXML_WS_AFTER_CLOSE) {
+		return ("\n");
+	}
+	return NULL;
+}
+
+
 int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	mxml_node_t *xml;
 	mxml_node_t *dane;
@@ -40,7 +56,7 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 			for (i = 0; i < ROZMIAR_POLA; i++) {
 				for (j = 0; j < ROZMIAR_POLA; j++) {
 					element = mxmlNewElement(wartosc, "Wartosc");
-					mxmlNewInteger(wartosc, gracz2.pole[i][j]);
+					mxmlNewInteger(element, gracz2.pole[i][j]);
 				}
 			}
 
@@ -48,7 +64,7 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 	FILE *fp;
 
 	fp = fopen("Zapis.xml", "w");
-	mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
+	mxmlSaveFile(xml, fp,MXML_NO_CALLBACK );
 	fclose(fp);
 
 }
@@ -72,8 +88,9 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
 	int i,j;
 	for (i = 0; i < ROZMIAR_POLA; i++) {
 		for (j = 0; j < ROZMIAR_POLA; j++) {
+			int wynik = gracz1.pole[i][j];
 			mxmlSetInteger(wartosc, gracz1.pole[i][j]);
-			wartosc = mxmlWalkNext(wartosc, dane, MXML_DESCEND);
+			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
 
@@ -83,11 +100,13 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
 	mxmlSetInteger(wartosc, gracz2.statki);
 	dane = mxmlFindPath(dane, "Pole");
 	wartosc = mxmlGetFirstChild(dane);
-	int i, j;
+	//wartosc= mxmlFindPath(dane,"Pole/Wartosc");
+	//int i, j;
 	for (i = 0; i < ROZMIAR_POLA; i++) {
 		for (j = 0; j < ROZMIAR_POLA; j++) {
+			int wynik = gracz2.pole[i][j];
 			mxmlSetInteger(wartosc, gracz2.pole[i][j]);
-			wartosc = mxmlWalkNext(wartosc, dane, MXML_DESCEND);
+			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
 	FILE *fp;
@@ -95,9 +114,10 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
 	fp = fopen("Zapis.xml", "w");
 	if (fp) {
 		mxmlSaveFile(*xml, fp, MXML_NO_CALLBACK);
-		printf("\n udany zapis \n");
+		fclose(fp);
+		return 1;
 	}
-	fclose(fp);
+	return 0;
 
 }
 
@@ -111,7 +131,7 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml) {
 	if (plik == 0) {
 		return 0;
 	}
-	drzewo = mxmlLoadFile(NULL, plik, MXML_NO_CALLBACK);
+	drzewo = mxmlLoadFile(NULL, plik, MXML_INTEGER_CALLBACK);
 	if (drzewo == 0) {
 		return 0;
 	}
@@ -119,7 +139,26 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml) {
 	*xml = drzewo;
 	dane = mxmlFindPath(drzewo, "Gracz1/Statki");
 	gracz1->statki = mxmlGetInteger(dane);
-	
+	dane = mxmlFindPath(drzewo, "Gracz1/Pole");
+	wartosc = mxmlGetFirstChild(dane);
+	int i, j;
+	for (i = 0; i < ROZMIAR_POLA; i++) {
+		for (j = 0; j < ROZMIAR_POLA; j++) {
+			gracz1->pole[i][j] = mxmlGetInteger(wartosc);
+			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
+		}
+	}
+	dane = mxmlFindPath(drzewo, "Gracz2/Statki");
+	gracz2->statki = mxmlGetInteger(dane);
+	dane = mxmlFindPath(drzewo, "Gracz2/Pole");
+	wartosc = mxmlGetFirstChild(dane);
+//	int i, j;
+	for (i = 0; i < ROZMIAR_POLA; i++) {
+		for (j = 0; j < ROZMIAR_POLA; j++) {
+			gracz2->pole[i][j] = mxmlGetInteger(wartosc);
+			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
+		}
+	}
 	return 1;
 }
 
@@ -276,19 +315,26 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 			}
 		}
 		//TODO przeniesc to do niezale¿nej fukcji bo sie powtarza
+		RysujPlansze(*gracz, 0);
 		printf("Teraz ustaw usuniety statek ponownie:");
 		int dane;
+		int wynik=0;
 		do {
 			dane = WprowadzZadanie(2);
 			if (dane == -3) {
 				UsunStatek(&temp->pPoprzednia, gracz);
 				RysujPlansze(*gracz, 0);
+				continue;
 			}
 			while (dane == -1) {
 				printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
 				dane = WprowadzZadanie(2);
 			}
-		} while (UstawStatek(gracz, dlugosc, dane / 100, dane % 100,temp->rodzaj) == 0 && printf("Nie mozna tu ustawic statku. Podaj ponownie: "));
+			wynik = UstawStatek(gracz, dlugosc, dane / 100, dane % 100, temp->rodzaj);
+			if (wynik == 0) {
+				printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
+			}
+		} while (wynik== 0);
 		temp->argument = dlugosc * 10000 + dane;
 		*historia = temp;
 
@@ -325,6 +371,7 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 		if (dlugosc == 1) {
 			for (i = 0; i < 4; i++) {
 				//pêtla do pobierania danych
+				int wynik;
 				do {
 					
 					dane = WprowadzZadanie(1);
@@ -332,7 +379,12 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 						printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola>");
 						dane = WprowadzZadanie(1);
 					}
-				} while (UstawStatek(gracz, dlugosc, dane / 100, 0,-3) == 0 && printf("Nie mozna tu ustawic statku. Podaj ponownie: "));
+					wynik = UstawStatek(gracz, dlugosc, dane / 100, 0, -3);
+					if (wynik == 0) {
+						printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
+					}
+					
+				} while (wynik == 0);
 				printf("\n");
 				RysujPlansze(*gracz, 0);
 				DodajdoListy(historia, ustaw, dlugosc * 10000 + dane,-3);
@@ -341,17 +393,23 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
 			return;
 		
 		}
+		int wynik=0;
 		do {
 			dane = WprowadzZadanie(2);
 			if (dane == -3) {
 				UsunStatek(historia, gracz);
 				RysujPlansze(*gracz, 0);
+				continue;
 			}
 			while (dane==-1) {
 				printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
 				dane = WprowadzZadanie(2);
 			}
-		} while (UstawStatek(gracz, dlugosc, dane/100, dane%100,rodzaj) == 0 && printf("Nie mozna tu ustawic statku. Podaj ponownie: "));
+			wynik = UstawStatek(gracz, dlugosc, dane / 100, dane % 100, rodzaj);
+			if (wynik == 0) {
+				printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
+			}
+		} while (wynik == 0 /*&& printf("Nie mozna tu ustawic statku. Podaj ponownie: ")*/);
 		DodajdoListy(historia, ustaw, dlugosc * 10000 + dane, rodzaj);
 		rodzaj++;
 		printf("\n");
@@ -369,23 +427,32 @@ int WprowadzZadanie(int liczbaArgumentow) {
 		wynik = scanf("%14[^\n]", buffor);
 		WyczyscBufor();
 	} while (wynik != 1);
+		
 	if (!strcmp(buffor, "cofnij")) {
-		printf("\nproba cofania");
+		printf("\nproba cofania\n");
 		return -3;
 	}
 	if (!strcmp(buffor, "zapisz")) {
 		printf("\nproba zapisu");
 		return -4;
 	}
+	if (!strcmp(buffor, "wczytaj")) {
+		printf("\nproba zapisu");
+		return -5;
+	}
 	if (!strcmp(buffor, "restart")) {
 		printf("\nproba restartu");
 		return -2;
+	}
+	if (liczbaArgumentow == 0) {
+		return 0;
 	}
 	if (sscanf(buffor, "%d%d", &arg1, &arg2) < liczbaArgumentow)
 		return -1;
 	if (liczbaArgumentow < 2) {
 		arg2 = 0;
 	}
+
 	return arg1*100+arg2;
 
 }
@@ -404,12 +471,18 @@ void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
 	RysujPlansze(*gracz1, 0);
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 	PobierzKoordynaty(4, gracz1,&historia);
-	printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"restart\"\nJezeli nie, wprowadz dowolny znak");
-	WyczyscBufor();
+	//printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"restart\"\nJezeli nie, wprowadz dowolny znak");
+	//WyczyscBufor();
 	int komenda;
 	do {
-		komenda = WprowadzZadanie(1);
-	} while (komenda == -1);
+		printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"restart\"\nJezeli nie, wprowadz dowolny znak");
+		WyczyscBufor();
+		komenda = WprowadzZadanie(0);
+		if (komenda == -3) {
+			UsunStatek(historia, gracz1);
+			RysujPlansze(*gracz1, 0);
+		}
+	} while (komenda != -1);
 	
 	
 
@@ -422,6 +495,7 @@ void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
 		RysujPlansze(*gracz2, 0);
 		printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 		PobierzKoordynaty(4, gracz2,&historia);
+		//TODO zroibæ to co w przypadku gracz 1
 		Oczysc();
 	}
 	else {
@@ -522,11 +596,33 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml) {
 			do {
 				cel = WprowadzZadanie(1);
 				if (cel == -4) {
-					Zapisz(*gracz1, *gracz2, xml);
+					printf("Proba zapisu \n");
+					if (Zapisz(*gracz1, *gracz2, xml)) {
+						printf("Udany zapis\n");
+					}
+					else {
+						printf("Nieudane wczytywanie, sprawdz czy plik zapisu istnieje i nie jest otwarty.\n");
+					}
+					continue;
+				}
+				if (cel == -5) {
+					printf("Proba wczytywania \n");
+					if (Wczytaj(gracz1, gracz2, xml)){
+						printf("Udane wczytanie\n");
+						RysujPlansze(*gracz1, 0);
+					}
+					else {
+						printf("Nieudane wczytywanie, sprawdz czy plik zapisu istnieje i nie jest otwarty. Plik moze byc uszkodzony.\n");
+					}
+					continue;
 				}
 			} while (cel == -1);
 			wynik = Strzal(gracz2, cel / 100);
-		}while (wynik == 0 && printf("W te pole nie mozna wycelowac. Podaj ponownie:") );
+			//TODO ufikusniæ
+			if (wynik != 0) {
+				printf("W te pole nie mozna wycelowac. Podaj ponownie:");
+			}
+		}while (wynik == 0 /*&& printf("W te pole nie mozna wycelowac. Podaj ponownie:")*/ );
 		printf("\n%o\n", gracz2->statki);
 		if (wynik > 1) {
 			if (wynik == 2)

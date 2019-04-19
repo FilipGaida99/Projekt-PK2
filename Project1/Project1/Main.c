@@ -5,10 +5,23 @@
 //#include <mxml.h>
 #include "mxml-3.0/mxml.h"
 
-int main() {
+int main(int ileArg, char* arg[]) {
 	ZmienKolor(BIALY);
 
-	
+	if (ileArg > 1) {
+		if (!strcmp(arg[1], "-l")) {
+
+		}
+		if (!strcmp(arg[1], "-h")) {
+
+		}
+		if (!strcmp(arg[1], "-c")){
+			if()
+
+		}
+	}
+
+
 	int trybGry;
 	printf("Witaj w grze w statki. Nacisnij dowolny klawisz aby rozpoczac.\n");
 	getchar();
@@ -28,8 +41,7 @@ int main() {
 	} while (trybGry!= 0 && trybGry != 1);
 	system("cls");
 	
-	int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA];
-	int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA];
+	
 
 	Gracz gracz1;
 	Gracz gracz2;
@@ -44,7 +56,9 @@ int main() {
 	UtworzZapis(trybGry, 0, 1, gracz1, gracz2,&xml);
 	tura_n = mxmlFindPath(xml, "Ustawienia/Tura");
 	czyja_n = mxmlFindPath(xml, "Ustawienia/Czyja_Tura");
-	//Wczytaj();
+
+	Historia* ruchy=0;
+	DodajdoListy(&ruchy, start, 0, 0);
 	int wynik1, wynik2;
 	if (trybGry == 1) {
 		do {
@@ -54,13 +68,17 @@ int main() {
 			printf("Tura gracza pierwszego. Nacisnij dowolny klawisz.\n");
 			WyczyscBufor();
 			printf("Tura: %d \n", tura);
-			wynik1=Bitwa(&gracz1, &gracz2,&xml);
+			WypiszRuchy(ruchy);
+			DodajdoListy(&ruchy, start, 0, 0);
+			wynik1=Bitwa(&gracz1, &gracz2,&xml, &ruchy);
 			Oczysc();
 			mxmlSetInteger(czyja_n, 2);
 			printf("Tura gracza drugiego. Nacisnij dowolny klawisz.\n");
 			WyczyscBufor();
 			printf("Tura: %d \n", tura);
-			wynik2 = Bitwa(&gracz2, &gracz1,&xml);
+			WypiszRuchy(ruchy);
+			DodajdoListy(&ruchy, start, 0, 0);
+			wynik2 = Bitwa(&gracz2, &gracz1,&xml, &ruchy);
 			mxmlSetInteger(tura_n, ++tura);
 
 		} while (wynik1 && wynik2);
@@ -76,9 +94,15 @@ int main() {
 		AI.stan[5] = IdzE;
 		AI.stanPoprzedni = 0;
 
+
+
 		do {
-			wynik1 = Bitwa(&gracz1, &gracz2, &xml);
-			wynik2 = BitwaAI(&gracz1,&AI);
+			printf("Tura: %d \n", tura);
+			WypiszRuchy(ruchy);
+			DodajdoListy(&ruchy, start, 0, 0);
+			wynik1 = Bitwa(&gracz1, &gracz2, &xml,&ruchy);
+			DodajdoListy(&ruchy, start, 0, 0);
+			wynik2 = BitwaAI(&gracz1,&AI, &ruchy);
 			mxmlSetInteger(tura_n, ++tura);
 		} while (wynik1 && wynik2);
 	}
@@ -93,8 +117,8 @@ int main() {
 		printf("Wygral Komputer");
 	}
 
-
-
+	UsunListe(&ruchy);
+	//usun¹æ
 	while (1)
 	{
 		getchar();

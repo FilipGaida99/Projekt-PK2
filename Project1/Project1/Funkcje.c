@@ -3,8 +3,9 @@
 #include <string.h>
 #include "Funkcje.h"
 
+#if _WIN32
 #include <Windows.h>
-
+#endif
 //#include <mxml.h>
 #include "mxml-3.0/mxml.h"
 
@@ -64,9 +65,12 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 	FILE *fp;
 
 	fp = fopen("Zapis.xml", "w");
-	mxmlSaveFile(xml, fp,MXML_NO_CALLBACK );
-	fclose(fp);
-
+	if (fp) {
+		mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
+		fclose(fp);
+		return 1;
+	}
+	return 0;
 }
 
 int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
@@ -152,7 +156,6 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml) {
 	gracz2->statki = mxmlGetInteger(dane);
 	dane = mxmlFindPath(drzewo, "Gracz2/Pole");
 	wartosc = mxmlGetFirstChild(dane);
-//	int i, j;
 	for (i = 0; i < ROZMIAR_POLA; i++) {
 		for (j = 0; j < ROZMIAR_POLA; j++) {
 			gracz2->pole[i][j] = mxmlGetInteger(wartosc);
@@ -174,6 +177,35 @@ Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodz
 	return *lista;
 }
 
+void UsunListe(Historia**lista) {
+	while (*lista != 0) {
+		Historia* nastepna = (*lista)->pPoprzednia;
+		free(*lista);
+		*lista = nastepna;
+	}
+}
+
+void WypiszRuchy(Historia* ruchy) {
+	if (ruchy->pPoprzednia == 0)
+		return;
+
+	printf("Twoj przeciwnik zakonczyl ture.\nWykonane przez niego ruchy to:\n");
+	int i, iloscRuchow=0;
+	Historia* temp = 0;
+	while (ruchy->zadanie != start) {
+		iloscRuchow++;
+		DodajdoListy(&temp, strzal, ruchy->argument, ruchy->rodzaj);
+		ruchy = ruchy->pPoprzednia;
+	}
+	for (i = 1; i <= iloscRuchow; i++) {
+		printf("%d. Gracz strzelil w pole: %d. %s", i, temp->argument, temp->rodzaj ? "Trafil\n" : "Spudlowal\n");
+		temp = temp->pPoprzednia;
+	}
+	UsunListe(&temp);
+
+}
+
+
 void WyczyscBufor() {
 	char pozostalosc;
 	do {
@@ -182,21 +214,48 @@ void WyczyscBufor() {
 }
 
 void ZmienKolor(int typ) {
-#if _WIN32
+#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(_WIN32)
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), typ);
+#endif
+#if defined(unix) || defined(__unix__) || defined(__unix)
+	switch (typ)
+	{case BIALY:
+		printf(UBIALY);
+		break;
+	case CZERWONY:
+		printf(UCZERWONY);
+		break;
+	case ZIELONY:
+		printf(UZIELONY);
+		break;
+	case NIEBIESKI:
+		printf(UNIEBIESKI);
+		break;
+	default:
+		break;
+	}
+#endif
 #else
 
 #endif
 }
 
 void Oczysc() {
-#if _WIN32
+#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(_WIN32)
 	system("cls");
+#endif
+#if defined(unix) || defined(__unix__) || defined(__unix)
+	printf("\033[2J");
+	//system("clear");
+#endif
 #else
 	int i;
 	for (i = 0; i < 100; i++) {
 		printf("\n");
 	}
+
 #endif
 }
 
@@ -296,6 +355,7 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajSta
 int UsunStatek(Historia** historia, Gracz* gracz) {
 	Historia* temp = *historia;
 	if (temp->zadanie == ustaw){
+		
 		int dlugosc, pole, kierunek, i, x, y;
 		//odszyfrowanie danych z struktury
 		dlugosc = temp->argument / 10000;
@@ -314,117 +374,91 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 				y++;
 			}
 		}
-		//TODO przeniesc to do niezale¿nej fukcji bo sie powtarza
+		
 		RysujPlansze(*gracz, 0);
-		printf("Teraz ustaw usuniety statek ponownie:");
-		int dane;
-		int wynik=0;
-		do {
-			dane = WprowadzZadanie(2);
-			if (dane == -3) {
-				UsunStatek(&temp->pPoprzednia, gracz);
-				RysujPlansze(*gracz, 0);
-				continue;
-			}
-			while (dane == -1) {
-				printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
-				dane = WprowadzZadanie(2);
-			}
-			wynik = UstawStatek(gracz, dlugosc, dane / 100, dane % 100, temp->rodzaj);
-			if (wynik == 0) {
-				printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
-			}
-		} while (wynik== 0);
-		temp->argument = dlugosc * 10000 + dane;
-		*historia = temp;
 
+		PobierzKoordynaty(dlugosc, gracz, &(temp->pPoprzednia), temp->rodzaj);
 		return 1;
 	}
 	if (temp->zadanie == start) {
 		return 0;
 	}
 	printf("Debug error");
+	return -1;
 
 }
 
 
-void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia) {
-	int i, j, dane, rodzaj;
-	i = 4 - dlugosc;
-	rodzaj = -9;
-	for (j=0;j<4;j++){
-	for (; i >= 0 && dlugosc > 0; i--) {
-		switch (dlugosc)
-		{
-		case 4: printf("Ustaw czteromasztowiec:");
-			break;
-		case 3: printf("Ustaw trzymasztowiec:");
-			break;
-		case 2: printf("Ustaw dwumasztowiec:");
-			break;
-		case 1: printf("Ustaw jednomasztowce (podaj tylko numery pola):");
-			break;
-		default: printf("blad");
-			break;
-		}
-		//dla jednomasztowców pomija siê kierunek
-		if (dlugosc == 1) {
-			for (i = 0; i < 4; i++) {
-				//pêtla do pobierania danych
-				int wynik;
-				do {
-					
-					dane = WprowadzZadanie(1);
-					while (dane == -1) {
-						printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola>");
-						dane = WprowadzZadanie(1);
-					}
-					wynik = UstawStatek(gracz, dlugosc, dane / 100, 0, -3);
-					if (wynik == 0) {
-						printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
-					}
-					
-				} while (wynik == 0);
-				printf("\n");
-				RysujPlansze(*gracz, 0);
-				DodajdoListy(historia, ustaw, dlugosc * 10000 + dane,-3);
 
-			}
-			return;
-		
-		}
-		int wynik=0;
-		do {
-			dane = WprowadzZadanie(2);
-			if (dane == -3) {
-				UsunStatek(historia, gracz);
-				RysujPlansze(*gracz, 0);
-				continue;
-			}
-			while (dane==-1) {
-				printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
-				dane = WprowadzZadanie(2);
-			}
-			wynik = UstawStatek(gracz, dlugosc, dane / 100, dane % 100, rodzaj);
-			if (wynik == 0) {
-				printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
-			}
-		} while (wynik == 0 /*&& printf("Nie mozna tu ustawic statku. Podaj ponownie: ")*/);
-		DodajdoListy(historia, ustaw, dlugosc * 10000 + dane, rodzaj);
-		rodzaj++;
-		printf("\n");
-		RysujPlansze(*gracz, 0);
-		}
-			dlugosc--;
-			i= 4-dlugosc;
+
+void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj) {
+	switch (dlugosc)
+	{
+	case 4: printf("Ustaw czteromasztowiec:");
+		break;
+	case 3: printf("Ustaw trzymasztowiec:");
+		break;
+	case 2: printf("Ustaw dwumasztowiec:");
+		break;
+	case 1: printf("Ustaw jednomasztowce (podaj tylko numery pola):");
+		break;
+	default: printf("blad");
+		break;
 	}
+	int dane;
+	int wynik = 0;
+	do {
+		if (dlugosc == 1){
+			dane = WprowadzZadanie(1);
+		}
+		else {
+			dane = WprowadzZadanie(2);
+		}
+		if (dane == -3) {
+			UsunStatek(historia, gracz);
+			//RysujPlansze(*gracz, 0);
+			switch (dlugosc)
+			{
+			case 4: printf("Ustaw czteromasztowiec:");
+				break;
+			case 3: printf("Ustaw trzymasztowiec:");
+				break;
+			case 2: printf("Ustaw dwumasztowiec:");
+				break;
+			case 1: printf("Ustaw jednomasztowce (podaj tylko numery pola):");
+				break;
+			default: printf("blad");
+				break;
+			}
+			continue;
+		}
+		if (dane == -2 || dane == -4 || dane == -5) {
+			printf("Nie mozna teraz wykonac tej akcji.\n");
+		}
+		while (dane == -1) {
+			printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
+			dane = WprowadzZadanie(2);
+		}
+		wynik = UstawStatek(gracz, dlugosc, dane / 100, dane % 100, rodzaj);
+		if (wynik == 0) {
+			printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
+		}
+	} while (wynik == 0 /*&& printf("Nie mozna tu ustawic statku. Podaj ponownie: ")*/);
+	DodajdoListy(historia, ustaw, dlugosc * 10000 + dane, rodzaj);
+	printf("\n");
+	RysujPlansze(*gracz, 0);
+
 }
+
 
 int WprowadzZadanie(int liczbaArgumentow) {
 	char buffor[15];
 	int wynik, arg1,arg2;
 	do {
 		wynik = scanf("%14[^\n]", buffor);
+		if (liczbaArgumentow == 0 && getchar() == '\n') {
+			return 0;
+		}
 		WyczyscBufor();
 	} while (wynik != 1);
 		
@@ -433,15 +467,15 @@ int WprowadzZadanie(int liczbaArgumentow) {
 		return -3;
 	}
 	if (!strcmp(buffor, "zapisz")) {
-		printf("\nproba zapisu");
+		printf("\nproba zapisu\n");
 		return -4;
 	}
 	if (!strcmp(buffor, "wczytaj")) {
-		printf("\nproba zapisu");
+		printf("\nproba zapisu\n");
 		return -5;
 	}
-	if (!strcmp(buffor, "restart")) {
-		printf("\nproba restartu");
+	if (!strcmp(buffor, "flota")) {
+		printf("\nRaport:\n");
 		return -2;
 	}
 	if (liczbaArgumentow == 0) {
@@ -458,31 +492,79 @@ int WprowadzZadanie(int liczbaArgumentow) {
 }
 
 
+void Init(Gracz* gracz) {
+	Historia* historia = 0;
+	DodajdoListy(&historia, start, 0, 0);
+	gracz->statki = 04332224;
+	WypelnijTablice(gracz1->pole, gracz2->pole);
+	printf("Twoje Pole: \n");
+	RysujPlansze(*gracz1, 0);
+	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 
+
+	PobierzKoordynaty(4, gracz1, &historia, -9);
+	PobierzKoordynaty(3, gracz1, &historia, -8);
+	PobierzKoordynaty(3, gracz1, &historia, -7);
+	PobierzKoordynaty(2, gracz1, &historia, -6);
+	PobierzKoordynaty(2, gracz1, &historia, -5);
+	PobierzKoordynaty(2, gracz1, &historia, -4);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+
+
+	int komenda;
+	do {
+		printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, wprowadz dowolny znak");
+
+		komenda = WprowadzZadanie(0);
+		if (komenda == -2 || komenda == -4 || komenda == -5) {
+			printf("Nie mozna teraz wykonac tej akcji.\n");
+		}
+		else if (komenda == -3) {
+			UsunStatek(&historia, gracz1);
+			RysujPlansze(*gracz1, 0);
+		}
+	} while (komenda != 0);
+}
 
 void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
 	Historia* historia = 0;
 	DodajdoListy(&historia, start, 0,0);
-	int pole, kierunek;
 	gracz1->statki = gracz2->statki = 04332224;
 	printf("%d", gracz2->statki);
 	WypelnijTablice(gracz1->pole,gracz2->pole);
 	printf("Twoje Pole: \n");
 	RysujPlansze(*gracz1, 0);
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
-	PobierzKoordynaty(4, gracz1,&historia);
-	//printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"restart\"\nJezeli nie, wprowadz dowolny znak");
-	//WyczyscBufor();
+
+
+	PobierzKoordynaty(4, gracz1, &historia, -9);
+	PobierzKoordynaty(3, gracz1, &historia, -8);
+	PobierzKoordynaty(3, gracz1, &historia, -7);
+	PobierzKoordynaty(2, gracz1, &historia, -6);
+	PobierzKoordynaty(2, gracz1, &historia, -5);
+	PobierzKoordynaty(2, gracz1, &historia, -4);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+	PobierzKoordynaty(1, gracz1, &historia, -3);
+	
+
 	int komenda;
 	do {
-		printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"restart\"\nJezeli nie, wprowadz dowolny znak");
-		WyczyscBufor();
+		printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, wprowadz dowolny znak");
+		
 		komenda = WprowadzZadanie(0);
-		if (komenda == -3) {
-			UsunStatek(historia, gracz1);
+		if (komenda == -2 || komenda == -4 || komenda == -5) {
+			printf("Nie mozna teraz wykonac tej akcji.\n");
+		}
+		else if (komenda == -3) {
+			UsunStatek(&historia, gracz1);
 			RysujPlansze(*gracz1, 0);
 		}
-	} while (komenda != -1);
+	} while (komenda != 0);
 	
 	
 
@@ -494,12 +576,32 @@ void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
 		printf("Twoje Pole: \n");
 		RysujPlansze(*gracz2, 0);
 		printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
-		PobierzKoordynaty(4, gracz2,&historia);
-		//TODO zroibæ to co w przypadku gracz 1
+		PobierzKoordynaty(4, gracz2, &historia, -9);
+		PobierzKoordynaty(3, gracz2, &historia, -8);
+		PobierzKoordynaty(3, gracz2, &historia, -7);
+		PobierzKoordynaty(2, gracz2, &historia, -6);
+		PobierzKoordynaty(2, gracz2, &historia, -5);
+		PobierzKoordynaty(2, gracz2, &historia, -4);
+		PobierzKoordynaty(1, gracz2, &historia, -3);
+		PobierzKoordynaty(1, gracz2, &historia, -3);
+		PobierzKoordynaty(1, gracz2, &historia, -3);
+		PobierzKoordynaty(1, gracz2, &historia, -3);
+		do {
+			printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, wprowadz dowolny znak");
+			
+			komenda = WprowadzZadanie(0);
+			if (komenda == -2 || komenda == -4 || komenda == -5) {
+				printf("Nie mozna teraz wykonac tej akcji.\n");
+			}
+			else if (komenda == -3) {
+				UsunStatek(&historia, gracz2);
+				RysujPlansze(*gracz2, 0);
+			}
+		} while (komenda != 0);
 		Oczysc();
 	}
 	else {
-		srand(time(0));
+		srand((int)(time(0)));
 		while(!UstawStatek(gracz2, 4, rand()%100, rand()%2,-9));
 		while (!UstawStatek(gracz2, 3, rand() % 100, rand() % 2,-8));
 		while (!UstawStatek(gracz2, 3, rand() % 100, rand() % 2,-7));
@@ -578,9 +680,8 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 	}
 }
 
-int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml) {
-	char rozkaz[7];
-	int cel;
+int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
+
 
 	printf("Oto twoje pole:\n");
 	RysujPlansze(*gracz1, 0);
@@ -599,37 +700,46 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml) {
 					printf("Proba zapisu \n");
 					if (Zapisz(*gracz1, *gracz2, xml)) {
 						printf("Udany zapis\n");
+						printf("Gdzie strzelac: ");
+						
 					}
 					else {
 						printf("Nieudane wczytywanie, sprawdz czy plik zapisu istnieje i nie jest otwarty.\n");
 					}
+					cel = -1;
 					continue;
+				}
+				if (cel == -3) {
+					printf("Nie mozna teraz wykonac tej akcji.\nPodaj inna komende lub miejsce strzalu:");
+					cel = -1;
 				}
 				if (cel == -5) {
 					printf("Proba wczytywania \n");
 					if (Wczytaj(gracz1, gracz2, xml)){
 						printf("Udane wczytanie\n");
 						RysujPlansze(*gracz1, 0);
+						printf("Gdzie strzelac: ");
+						
 					}
 					else {
 						printf("Nieudane wczytywanie, sprawdz czy plik zapisu istnieje i nie jest otwarty. Plik moze byc uszkodzony.\n");
 					}
+					cel = -1;
 					continue;
 				}
 			} while (cel == -1);
 			wynik = Strzal(gracz2, cel / 100);
-			//TODO ufikusniæ
-			if (wynik != 0) {
+			if (wynik == 0) {
 				printf("W te pole nie mozna wycelowac. Podaj ponownie:");
 			}
-		}while (wynik == 0 /*&& printf("W te pole nie mozna wycelowac. Podaj ponownie:")*/ );
+		}while (wynik == 0);
 		printf("\n%o\n", gracz2->statki);
 		if (wynik > 1) {
 			if (wynik == 2)
 				printf("Trafiony!\n");
 			else
 				printf("Trafiony zatopiony!\n");
-			
+			DodajdoListy(ruchy, strzal, cel / 100, 1);
 			RysujPlansze(*gracz2,1);
 			if (gracz2->statki == 0) {
 				return 0;
@@ -638,11 +748,13 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml) {
 
 		if (wynik == 1) {
 			printf("Pudlo :(\n");
+			DodajdoListy(ruchy, strzal, cel / 100, 0);
 			return 1;
 		}
 		
 	}
 }
+
 
 int Losuj(int poprzedniePole) {
 	return rand() % 100;
@@ -686,9 +798,7 @@ int IdzW(int poprzedniePole) {
 	return tymczasowa;
 }
 
-
-
-int BitwaAI(Gracz* atakowanyGracz, Wybor* AI) {
+int BitwaAI(Gracz* atakowanyGracz, Wybor* AI, Historia** ruchy) {
 	int wynik, cel;
 	do {
 		do{
@@ -700,7 +810,9 @@ int BitwaAI(Gracz* atakowanyGracz, Wybor* AI) {
 
 		} while (cel == -1 && AI->stanPoprzedni++);
 		wynik = Strzal(atakowanyGracz, cel);
-		
+		if (wynik != 0) {
+			DodajdoListy(ruchy, strzal, cel, wynik - 1);
+		}
 		if (atakowanyGracz->statki == 0) {
 			return 0;
 		}
@@ -726,7 +838,10 @@ int BitwaAI(Gracz* atakowanyGracz, Wybor* AI) {
 				AI->stanPoprzedni++;
 			}
 		}
+		
+		
 	} while (wynik != 1);
+	
 	return 1;
 }
 

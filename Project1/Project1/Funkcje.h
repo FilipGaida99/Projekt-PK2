@@ -52,8 +52,10 @@ typedef struct Lista{
 void WyczyscBufor();
 //Funkcja wyœwietlaj¹ca graczowi planszê jego lub przeciwnika. Dla zmiennej dyskrecja równej 0, statki s¹ wyœwietlane, dla 1 s¹ pomijane.
 void RysujPlansze(Gracz gracz, int dyskrecja);
-//Funkcja rozpoczyna przygotowanie do gry w przyadku, gdy nie rozpoczêto od wczytania zapisu.
-void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry);
+//Funkcja rozpoczyna przygotowanie do gry w przypadku, gdy nie rozpoczêto od wczytania zapisu.
+void Rozmieszczenie(Gracz* gracz);
+//Funkcja rozpoczyna przygotowanie do gry oraz losowo umieszcza wszystkie statki.
+void AutoRozmieszczenie(Gracz* gracz);
 //Procedura wype³nienia tablic bêd¹ch plansz¹ dla graczy w odpowiedni sposób.
 void WypelnijTablice(int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA], int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA]);
 //Komunikacja z u¿ytkownikiem po zakoñczeniu przygotowañ.
@@ -82,7 +84,7 @@ int BitwaAI(Gracz* atakowanyGracz, Wybor* AI, Historia** ruchy);
 
 void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia, int rodzaj);
 int UtworzZapis(int trybGry, int tura, int czyja, Gracz gracz1, Gracz gracz2, mxml_node_t** xml);
-int Wczytaj(Gracz* gracz1, Gracz* gracz2, mxml_node_t**xml);
+int Wczytaj(Gracz* gracz1, Gracz* gracz2, mxml_node_t**xml, Historia** ruchy);
 
 #endif // !FUNKCJE_H
 

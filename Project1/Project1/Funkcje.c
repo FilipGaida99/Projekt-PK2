@@ -27,18 +27,20 @@ const char* callback(mxml_node_t* node, int gdzie) {
 
 int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	mxml_node_t *xml;
+	mxml_node_t *informacje;
 	mxml_node_t *dane;
 	mxml_node_t *wartosc;
 	mxml_node_t *element;
 	xml = mxmlNewXML("1.0");
-		dane = mxmlNewElement(xml, "Ustawienia");
+	informacje = mxmlNewElement(xml, "Informacje");
+		dane = mxmlNewElement(informacje, "Ustawienia");
 			wartosc = mxmlNewElement(dane, "Tryb_Gry");
 			mxmlNewInteger(wartosc, trybGry);
 			wartosc = mxmlNewElement(dane, "Tura");
 			mxmlNewInteger(wartosc, tura);
 			wartosc = mxmlNewElement(dane, "Czyja_Tura");
 			mxmlNewInteger(wartosc, czyja);
-		dane = mxmlNewElement(xml, "Gracz1");
+		dane = mxmlNewElement(informacje, "Gracz1");
 			wartosc= mxmlNewElement(dane, "Statki");
 			mxmlNewInteger(wartosc, gracz1.statki);
 			wartosc = mxmlNewElement(dane, "Pole");
@@ -49,7 +51,7 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 					mxmlNewInteger(element, gracz1.pole[i][j]);
 				}
 			}
-		dane = mxmlNewElement(xml, "Gracz2");
+		dane = mxmlNewElement(informacje, "Gracz2");
 			wartosc = mxmlNewElement(dane, "Statki");
 			mxmlNewInteger(wartosc, gracz2.statki);
 			wartosc = mxmlNewElement(dane, "Pole");
@@ -60,7 +62,9 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 					mxmlNewInteger(element, gracz2.pole[i][j]);
 				}
 			}
-
+		dane = mxmlNewElement(informacje, "Ruchy");
+			wartosc = mxmlNewElement(dane, "Element");
+			mxmlNewInteger(wartosc, -1);
 	*drzewo = xml;
 	FILE *fp;
 
@@ -73,18 +77,20 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 	return 0;
 }
 
-int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
+int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml, Historia* ruchy) {
+	mxml_node_t* informacje;
 	mxml_node_t *dane;
 	mxml_node_t *wartosc;
 	int czyja;
-	dane = mxmlFindPath(*xml, "Ustawienia/Czyja_Tura");
+	informacje = mxmlGetFirstChild(*xml);
+	dane = mxmlFindPath(informacje, "Ustawienia/Czyja_Tura");
 	czyja = mxmlGetInteger(dane);
-	if (czyja == 2) {
+	if (czyja == 2) { //zamaiana kolejnosci graczy, aby zachowaæ sposób kodowania informacji
 		Gracz tymczasowa = gracz1;
 		gracz1 = gracz2;
 		gracz2 = tymczasowa;
 	}
-	dane = mxmlFindPath(*xml, "Gracz1");
+	dane = mxmlFindPath(informacje, "Gracz1");
 	wartosc = mxmlGetFirstChild(dane);
 	mxmlSetInteger(wartosc, gracz1.statki);
 	dane = mxmlFindPath(dane, "Pole");
@@ -99,19 +105,25 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
 	}
 
 
-	dane = mxmlFindPath(*xml, "Gracz2");
+	dane = mxmlFindPath(informacje, "Gracz2");
 	wartosc = mxmlGetFirstChild(dane);
 	mxmlSetInteger(wartosc, gracz2.statki);
 	dane = mxmlFindPath(dane, "Pole");
 	wartosc = mxmlGetFirstChild(dane);
-	//wartosc= mxmlFindPath(dane,"Pole/Wartosc");
-	//int i, j;
 	for (i = 0; i < ROZMIAR_POLA; i++) {
 		for (j = 0; j < ROZMIAR_POLA; j++) {
 			int wynik = gracz2.pole[i][j];
 			mxmlSetInteger(wartosc, gracz2.pole[i][j]);
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
+	}
+	dane = mxmlFindPath(informacje, "Ruchy");
+	mxmlDelete(dane);
+	dane = mxmlNewElement(informacje, "Ruchy");
+	while (ruchy != 0 && ruchy->zadanie!=start) {
+		wartosc = mxmlNewElement(dane, "Element");
+		mxmlNewInteger(wartosc, ruchy->argument * 10 + ruchy->rodzaj);
+		ruchy = ruchy->pPoprzednia;
 	}
 	FILE *fp;
 
@@ -125,9 +137,10 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml) {
 
 }
 
-int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml) {
+int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
 	FILE *plik;
 	mxml_node_t *drzewo;
+	mxml_node_t *informacje;
 	mxml_node_t *dane;
 	mxml_node_t *wartosc;
 
@@ -139,11 +152,14 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml) {
 	if (drzewo == 0) {
 		return 0;
 	}
-	mxmlDelete(*xml);
+	if (*xml != 0) {
+		mxmlDelete(*xml);
+	}
 	*xml = drzewo;
-	dane = mxmlFindPath(drzewo, "Gracz1/Statki");
+	informacje = mxmlGetFirstChild(drzewo);
+	dane = mxmlFindPath(informacje, "Gracz1/Statki");
 	gracz1->statki = mxmlGetInteger(dane);
-	dane = mxmlFindPath(drzewo, "Gracz1/Pole");
+	dane = mxmlFindPath(informacje, "Gracz1/Pole");
 	wartosc = mxmlGetFirstChild(dane);
 	int i, j;
 	for (i = 0; i < ROZMIAR_POLA; i++) {
@@ -152,15 +168,24 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml) {
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
-	dane = mxmlFindPath(drzewo, "Gracz2/Statki");
+	dane = mxmlFindPath(informacje, "Gracz2/Statki");
 	gracz2->statki = mxmlGetInteger(dane);
-	dane = mxmlFindPath(drzewo, "Gracz2/Pole");
+	dane = mxmlFindPath(informacje, "Gracz2/Pole");
 	wartosc = mxmlGetFirstChild(dane);
 	for (i = 0; i < ROZMIAR_POLA; i++) {
 		for (j = 0; j < ROZMIAR_POLA; j++) {
 			gracz2->pole[i][j] = mxmlGetInteger(wartosc);
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
+	}
+
+	dane = mxmlFindPath(informacje, "Ruchy");
+	DodajdoListy(ruchy, start, 0, 0);
+	wartosc = mxmlGetLastChild(dane);
+	while (wartosc != 0) {
+		int dane = mxmlGetInteger(wartosc);
+		DodajdoListy(ruchy, strzal, dane / 10, dane % 10);
+		wartosc = mxmlGetPrevSibling(wartosc);
 	}
 	return 1;
 }
@@ -186,7 +211,7 @@ void UsunListe(Historia**lista) {
 }
 
 void WypiszRuchy(Historia* ruchy) {
-	if (ruchy->pPoprzednia == 0)
+	if (ruchy->pPoprzednia == 0 || ruchy->zadanie==start)
 		return;
 
 	printf("Twoj przeciwnik zakonczyl ture.\nWykonane przez niego ruchy to:\n");
@@ -203,6 +228,19 @@ void WypiszRuchy(Historia* ruchy) {
 	}
 	UsunListe(&temp);
 
+}
+
+
+void WypiszFlote(Gracz* przeciwnik) {
+	int mnoznik = 1;
+	printf("Jednomasztowce: %d\n", (przeciwnik->statki / mnoznik) % 8);
+	mnoznik *= 8;
+	//int wynik = ((przeciwnik->statki / mnoznik) % 8 != 0 ) + ((przeciwnik->statki / (mnoznik * 8)) % 8 != 0) + ((przeciwnik->statki / (mnoznik * 8 * 8)) % 8 != 0);
+	printf("Dwumasztowce: %d\n", ((przeciwnik->statki / mnoznik) % 8!=0 )+ ((przeciwnik->statki / (mnoznik * 8)) % 8!=0) +((przeciwnik->statki / (mnoznik * 8 * 8)) % 8 != 0));
+	mnoznik *= 8 * 8 * 8;
+	printf("Trzymasztowce: %d\n",( (przeciwnik->statki / mnoznik) % 8 != 0) + ((przeciwnik->statki / (mnoznik * 8)) % 8 != 0));
+	mnoznik *= 8 * 8;
+	printf("Czteromasztowiec: %d\n", (przeciwnik->statki / mnoznik) % 8 != 0);
 }
 
 
@@ -389,8 +427,6 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 }
 
 
-
-
 void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj) {
 	switch (dlugosc)
 	{
@@ -471,7 +507,7 @@ int WprowadzZadanie(int liczbaArgumentow) {
 		return -4;
 	}
 	if (!strcmp(buffor, "wczytaj")) {
-		printf("\nproba zapisu\n");
+		printf("\nproba wczytywania\n");
 		return -5;
 	}
 	if (!strcmp(buffor, "flota")) {
@@ -492,26 +528,25 @@ int WprowadzZadanie(int liczbaArgumentow) {
 }
 
 
-void Init(Gracz* gracz) {
+void Rozmieszczenie(Gracz* gracz) {
 	Historia* historia = 0;
 	DodajdoListy(&historia, start, 0, 0);
 	gracz->statki = 04332224;
-	WypelnijTablice(gracz1->pole, gracz2->pole);
 	printf("Twoje Pole: \n");
-	RysujPlansze(*gracz1, 0);
+	RysujPlansze(*gracz, 0);
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 
 
-	PobierzKoordynaty(4, gracz1, &historia, -9);
-	PobierzKoordynaty(3, gracz1, &historia, -8);
-	PobierzKoordynaty(3, gracz1, &historia, -7);
-	PobierzKoordynaty(2, gracz1, &historia, -6);
-	PobierzKoordynaty(2, gracz1, &historia, -5);
-	PobierzKoordynaty(2, gracz1, &historia, -4);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
+	PobierzKoordynaty(4, gracz, &historia, -9);
+	PobierzKoordynaty(3, gracz, &historia, -8);
+	PobierzKoordynaty(3, gracz, &historia, -7);
+	PobierzKoordynaty(2, gracz, &historia, -6);
+	PobierzKoordynaty(2, gracz, &historia, -5);
+	PobierzKoordynaty(2, gracz, &historia, -4);
+	PobierzKoordynaty(1, gracz, &historia, -3);
+	PobierzKoordynaty(1, gracz, &historia, -3);
+	PobierzKoordynaty(1, gracz, &historia, -3);
+	PobierzKoordynaty(1, gracz, &historia, -3);
 
 
 	int komenda;
@@ -523,100 +558,30 @@ void Init(Gracz* gracz) {
 			printf("Nie mozna teraz wykonac tej akcji.\n");
 		}
 		else if (komenda == -3) {
-			UsunStatek(&historia, gracz1);
-			RysujPlansze(*gracz1, 0);
+			UsunStatek(&historia, gracz);
+			RysujPlansze(*gracz, 0);
 		}
 	} while (komenda != 0);
+	UsunListe(&historia);
+}
+void AutoRozmieszczenie(Gracz* gracz) {
+	gracz->statki = 04332224;
+	srand((int)(time(0)));
+	while (!UstawStatek(gracz, 4, rand() % 100, rand() % 2, -9));
+	while (!UstawStatek(gracz, 3, rand() % 100, rand() % 2, -8));
+	while (!UstawStatek(gracz, 3, rand() % 100, rand() % 2, -7));
+	while (!UstawStatek(gracz, 2, rand() % 100, rand() % 2, -6));
+	while (!UstawStatek(gracz, 2, rand() % 100, rand() % 2, -5));
+	while (!UstawStatek(gracz, 2, rand() % 100, rand() % 2, -4));
+	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
+	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
+	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
+	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
+
+	Oczysc();
 }
 
-void IniciujGre(Gracz* gracz1, Gracz* gracz2, int trybGry) {
-	Historia* historia = 0;
-	DodajdoListy(&historia, start, 0,0);
-	gracz1->statki = gracz2->statki = 04332224;
-	printf("%d", gracz2->statki);
-	WypelnijTablice(gracz1->pole,gracz2->pole);
-	printf("Twoje Pole: \n");
-	RysujPlansze(*gracz1, 0);
-	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 
-
-	PobierzKoordynaty(4, gracz1, &historia, -9);
-	PobierzKoordynaty(3, gracz1, &historia, -8);
-	PobierzKoordynaty(3, gracz1, &historia, -7);
-	PobierzKoordynaty(2, gracz1, &historia, -6);
-	PobierzKoordynaty(2, gracz1, &historia, -5);
-	PobierzKoordynaty(2, gracz1, &historia, -4);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
-	PobierzKoordynaty(1, gracz1, &historia, -3);
-	
-
-	int komenda;
-	do {
-		printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, wprowadz dowolny znak");
-		
-		komenda = WprowadzZadanie(0);
-		if (komenda == -2 || komenda == -4 || komenda == -5) {
-			printf("Nie mozna teraz wykonac tej akcji.\n");
-		}
-		else if (komenda == -3) {
-			UsunStatek(&historia, gracz1);
-			RysujPlansze(*gracz1, 0);
-		}
-	} while (komenda != 0);
-	
-	
-
-	if (trybGry == 1) {
-		Oczysc();
-		printf("Tura gracza drugiego. Nacisnij dowolny klawisz");
-		getchar();
-		Oczysc();
-		printf("Twoje Pole: \n");
-		RysujPlansze(*gracz2, 0);
-		printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
-		PobierzKoordynaty(4, gracz2, &historia, -9);
-		PobierzKoordynaty(3, gracz2, &historia, -8);
-		PobierzKoordynaty(3, gracz2, &historia, -7);
-		PobierzKoordynaty(2, gracz2, &historia, -6);
-		PobierzKoordynaty(2, gracz2, &historia, -5);
-		PobierzKoordynaty(2, gracz2, &historia, -4);
-		PobierzKoordynaty(1, gracz2, &historia, -3);
-		PobierzKoordynaty(1, gracz2, &historia, -3);
-		PobierzKoordynaty(1, gracz2, &historia, -3);
-		PobierzKoordynaty(1, gracz2, &historia, -3);
-		do {
-			printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, wprowadz dowolny znak");
-			
-			komenda = WprowadzZadanie(0);
-			if (komenda == -2 || komenda == -4 || komenda == -5) {
-				printf("Nie mozna teraz wykonac tej akcji.\n");
-			}
-			else if (komenda == -3) {
-				UsunStatek(&historia, gracz2);
-				RysujPlansze(*gracz2, 0);
-			}
-		} while (komenda != 0);
-		Oczysc();
-	}
-	else {
-		srand((int)(time(0)));
-		while(!UstawStatek(gracz2, 4, rand()%100, rand()%2,-9));
-		while (!UstawStatek(gracz2, 3, rand() % 100, rand() % 2,-8));
-		while (!UstawStatek(gracz2, 3, rand() % 100, rand() % 2,-7));
-		while (!UstawStatek(gracz2, 2, rand() % 100, rand() % 2, -6));
-		while (!UstawStatek(gracz2, 2, rand() % 100, rand() % 2, -5));
-		while (!UstawStatek(gracz2, 2, rand() % 100, rand() % 2, -4));
-		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2, -3));
-		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2, -3));
-		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2, -3));
-		while (!UstawStatek(gracz2, 1, rand() % 100, rand() % 2, -3));
-
-		Oczysc();
-
-	}
-}
 
 
 void WypelnijTablice(int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA], int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA]) {
@@ -682,6 +647,8 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 
 int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 
+	WypiszRuchy(*ruchy);
+	DodajdoListy(ruchy, start, 0, 0);
 
 	printf("Oto twoje pole:\n");
 	RysujPlansze(*gracz1, 0);
@@ -698,7 +665,7 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 				cel = WprowadzZadanie(1);
 				if (cel == -4) {
 					printf("Proba zapisu \n");
-					if (Zapisz(*gracz1, *gracz2, xml)) {
+					if (Zapisz(*gracz1, *gracz2, xml,*ruchy)) {
 						printf("Udany zapis\n");
 						printf("Gdzie strzelac: ");
 						
@@ -713,12 +680,18 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 					printf("Nie mozna teraz wykonac tej akcji.\nPodaj inna komende lub miejsce strzalu:");
 					cel = -1;
 				}
+				if (cel == -2) {
+					WypiszFlote(gracz2);
+					cel = -1;
+					printf("Gdzie strzelac: ");
+				}
 				if (cel == -5) {
 					printf("Proba wczytywania \n");
-					if (Wczytaj(gracz1, gracz2, xml)){
+					if (Wczytaj(gracz1, gracz2, xml,ruchy)){
 						printf("Udane wczytanie\n");
-						RysujPlansze(*gracz1, 0);
-						printf("Gdzie strzelac: ");
+						//RysujPlansze(*gracz1, 0);
+						//printf("Gdzie strzelac: ");
+						return 2;
 						
 					}
 					else {
@@ -733,7 +706,7 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 				printf("W te pole nie mozna wycelowac. Podaj ponownie:");
 			}
 		}while (wynik == 0);
-		printf("\n%o\n", gracz2->statki);
+
 		if (wynik > 1) {
 			if (wynik == 2)
 				printf("Trafiony!\n");

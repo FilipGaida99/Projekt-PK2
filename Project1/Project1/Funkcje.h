@@ -2,7 +2,6 @@
 #define FUNKCJE_H
 
 #include <stdio.h>
-//#include <mxml.h>
 
 #include "mxml-3.0/mxml.h"
 
@@ -10,6 +9,23 @@
 
 #define ROZMIAR_POLA 10
 
+
+//Makra zwiêkszaj¹ce czytelnoœæ kodu
+//WPROWAZDZANIE KOMEND
+#define ZAD_FLOTA -2
+#define ZAD_COFNIJ -3
+#define ZAD_ZAPISZ -4
+#define ZAD_WCZYTAJ -5
+#define ZAD_BRAK 0
+//WYNIK BITWY
+#define B_KONIEC 0
+#define B_NIEKONIEC 1
+#define B_WCZYTAJ 2
+//WYNIK STRZA£U
+#define ST_BLAD 0
+#define ST_PUDLO 1
+#define ST_CEL 2
+#define ST_ZATOP 3
 
 #define ZIELONY 10
 #define CZERWONY 12
@@ -28,7 +44,7 @@ typedef enum Dzialania{start,ustaw,strzal}Zadanie;
 
 //struktura przechowuj¹ca dane gracza.
 typedef struct {
-	int pole[ROZMIAR_POLA][ROZMIAR_POLA];
+	int** pole;
 	int statki;
 }Gracz;
 
@@ -56,8 +72,10 @@ void RysujPlansze(Gracz gracz, int dyskrecja);
 void Rozmieszczenie(Gracz* gracz);
 //Funkcja rozpoczyna przygotowanie do gry oraz losowo umieszcza wszystkie statki.
 void AutoRozmieszczenie(Gracz* gracz);
-//Procedura wype³nienia tablic bêd¹ch plansz¹ dla graczy w odpowiedni sposób.
-void WypelnijTablice(int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA], int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA]);
+//Procedura alokowania wype³nienia tablic bêd¹ch plansz¹ dla graczy w odpowiedni sposób.
+int WypelnijTablice(Gracz* gracz1, Gracz*gracz2);
+//Procedura usuwania tablic
+void UsunTablice(Gracz* gracz1, Gracz*gracz2);
 //Komunikacja z u¿ytkownikiem po zakoñczeniu przygotowañ.
 int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy);
 //Funkcja czyszcz¹ca konsolê. Zabezpieczenie przed podgl¹daniem pól przeciwnika.

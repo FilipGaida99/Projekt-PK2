@@ -10,24 +10,7 @@
 #include "mxml-3.0/mxml.h"
 
 
-
-const char* callback(mxml_node_t* node, int gdzie) {
-	const char* element;
-
-	element = mxmlGetElement(node);
-	if (!strcmp(element, "Wartosc")) {
-		return ("\n");
-	}
-
-
-	if (gdzie == MXML_WS_BEFORE_OPEN || gdzie == MXML_WS_AFTER_CLOSE) {
-		return ("\n");
-	}
-	return NULL;
-}
-
-
-int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
+int UtworzZapis(int trybGry, Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	mxml_node_t *xml;
 	mxml_node_t *informacje;
 	mxml_node_t *dane;
@@ -39,9 +22,9 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 			wartosc = mxmlNewElement(dane, "Tryb_Gry");
 			mxmlNewInteger(wartosc, trybGry);
 			wartosc = mxmlNewElement(dane, "Tura");
-			mxmlNewInteger(wartosc, tura);
+			mxmlNewInteger(wartosc, 1);
 			wartosc = mxmlNewElement(dane, "Czyja_Tura");
-			mxmlNewInteger(wartosc, czyja);
+			mxmlNewInteger(wartosc, 1);
 		dane = mxmlNewElement(informacje, "Gracz1");
 			wartosc= mxmlNewElement(dane, "Statki");
 			mxmlNewInteger(wartosc, gracz1.statki);
@@ -161,6 +144,7 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
 		mxmlDelete(*xml);
 	}
 	*xml = drzewo;
+	//Odczytwyanie danych graczy
 	informacje = mxmlGetFirstChild(drzewo);
 	dane = mxmlFindPath(informacje, "Gracz1/Statki");
 	gracz1->statki = mxmlGetInteger(dane);
@@ -183,7 +167,7 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
-
+	//Wczytywanie listy ruchów
 	dane = mxmlFindPath(informacje, "Ruchy");
 	DodajdoListy(ruchy, start, 0, 0);
 	wartosc = mxmlGetLastChild(dane);
@@ -261,11 +245,11 @@ void WyczyscBufor() {
 }
 
 void ZmienKolor(int typ) {
-#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
 #if defined(_WIN32)
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), typ);
 #endif
-#if defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
 	switch (typ)
 	{case BIALY:
 		printf(UBIALY);
@@ -284,29 +268,28 @@ void ZmienKolor(int typ) {
 	}
 #endif
 #else
-
+	//dla innych systemów nie zmienia koloru tekstu
 #endif
 }
 
 void Oczysc() {
-#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
 #if defined(_WIN32)
 	system("cls");
 #endif
-#if defined(unix) || defined(__unix__) || defined(__unix)
-	printf("\033[2J");
-	//system("clear");
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
+	printf("\n");
+	system("clear");
+	system("clear");
 #endif
 #else
 	int i;
-	for (i = 0; i < 100; i++) {
+	for (i = 0; i < NO_SYS_NEWLINE; i++) {
 		printf("\n");
 	}
 
 #endif
 }
-
-
 
 void RysujPlansze(Gracz player, int dyskrecja) {
 	int i, j, c=0;
@@ -430,7 +413,6 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 	if (temp->zadanie == start) {
 		return 0;
 	}
-	printf("Debug error");
 	return -1;
 
 }
@@ -461,7 +443,6 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj
 		}
 		if (dane == -3) {
 			UsunStatek(historia, gracz);
-			//RysujPlansze(*gracz, 0);
 			switch (dlugosc)
 			{
 			case 4: printf("Ustaw czteromasztowiec:");
@@ -498,15 +479,19 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj
 
 int WprowadzZadanie(int liczbaArgumentow) {
 	char buffor[15];
-	int wynik, arg1,arg2;
+	int i, wynik, arg1,arg2;
 	do {
-		wynik = scanf("%14[^\n]", buffor);
+		wynik = scanf("%14[^\n]s", buffor);
 		if (liczbaArgumentow == 0 && getchar() == '\n') {
 			return 0;
 		}
 		WyczyscBufor();
 	} while (wynik != 1);
-		
+	//Zwiêkszenie zakresu poprawnych komend przez znormalizowanie tekstu
+	for (i = 0; buffor[i] != '\0'; i++) {
+		buffor[i] = tolower((unsigned char)buffor[i]);
+	}
+
 	if (!strcmp(buffor, "cofnij")) {
 		printf("\nproba cofania\n");
 		return -3;
@@ -698,7 +683,7 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 	RysujPlansze(*gracz2, 1);
 	
 	
-
+	//pêtla do pobierania informacji. Jest z zawsze prawdziwym warunkiem aby jedyne co mog³o j¹ zatrzymaæ to zwrócenie wartoœæi funkcji
 	while (1) {
 		int cel,wynik;
 		printf("Gdzie strzelac: ");
@@ -712,7 +697,7 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 						
 					}
 					else {
-						printf("Nieudane wczytywanie, sprawdz czy plik zapisu istnieje i nie jest otwarty.\n");
+						printf("Nieudane zapisywanie, sprawdz czy plik zapisu nie jest otwarty.\n");
 					}
 					cel = -1;
 					continue;
@@ -727,7 +712,6 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 					printf("Gdzie strzelac: ");
 				}
 				if (cel == ZAD_WCZYTAJ) {
-					printf("Proba wczytywania \n");
 					if (Wczytaj(gracz1, gracz2, xml,ruchy)){
 						printf("Udane wczytanie\n");
 						return B_WCZYTAJ;
@@ -769,7 +753,7 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 
 
 int Losuj(int poprzedniePole) {
-	return rand() % 100;
+	return rand() % (ROZMIAR_POLA*ROZMIAR_POLA);
 }
 
 int IdzN(int poprzedniePole) {

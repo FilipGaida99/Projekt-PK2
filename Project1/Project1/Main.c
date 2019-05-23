@@ -10,7 +10,7 @@
 
 int main(int ileArg, char* arg[]) {
 	ZmienKolor(BIALY);
-	srand(time(NULL));
+	srand((int)time(NULL));
 	int trybGry = -1;
 	int automat = 0;
 	int wczytaj = 0;
@@ -82,7 +82,7 @@ int main(int ileArg, char* arg[]) {
 			UsunTablice(&gracz1, &gracz2);
 			return 0;
 		}
-
+		
 		trybGry = mxmlGetInteger(mxmlFindPath(xml, "Informacje/Ustawienia/Tryb_Gry"));
 	}
 	else {//przygotowanie do gry
@@ -104,7 +104,7 @@ int main(int ileArg, char* arg[]) {
 			AutoRozmieszczenie(&gracz2);
 		}
 		
-		UtworzZapis(trybGry, 1, 1, gracz1, gracz2, &xml);
+		UtworzZapis(trybGry, gracz1, gracz2, &xml);
 	}
 	
 	
@@ -190,10 +190,6 @@ int main(int ileArg, char* arg[]) {
 	}
 	mxmlDelete(xml);
 	UsunListe(&ruchy);
-	//usun¹æ
-	system("pause");
-
 	UsunTablice(&gracz1, &gracz2);
-	_CrtDumpMemoryLeaks();
 	return 0;
 }

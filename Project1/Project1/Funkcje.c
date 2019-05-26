@@ -1,31 +1,16 @@
 #include <stdio.h>
-#include <time.h>
+#include <stdlib.h>
 #include <string.h>
 #include "Funkcje.h"
+
 
 #if _WIN32
 #include <Windows.h>
 #endif
-//#include <mxml.h>
 #include "mxml-3.0/mxml.h"
 
-const char* callback(mxml_node_t* node, int gdzie) {
-	const char* element;
 
-	element = mxmlGetElement(node);
-	if (!strcmp(element, "Wartosc")) {
-		return ("\n");
-	}
-
-
-	if (gdzie == MXML_WS_BEFORE_OPEN || gdzie == MXML_WS_AFTER_CLOSE) {
-		return ("\n");
-	}
-	return NULL;
-}
-
-
-int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
+int UtworzZapis(int trybGry, Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	mxml_node_t *xml;
 	mxml_node_t *informacje;
 	mxml_node_t *dane;
@@ -37,9 +22,9 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 			wartosc = mxmlNewElement(dane, "Tryb_Gry");
 			mxmlNewInteger(wartosc, trybGry);
 			wartosc = mxmlNewElement(dane, "Tura");
-			mxmlNewInteger(wartosc, tura);
+			mxmlNewInteger(wartosc, 1);
 			wartosc = mxmlNewElement(dane, "Czyja_Tura");
-			mxmlNewInteger(wartosc, czyja);
+			mxmlNewInteger(wartosc, 1);
 		dane = mxmlNewElement(informacje, "Gracz1");
 			wartosc= mxmlNewElement(dane, "Statki");
 			mxmlNewInteger(wartosc, gracz1.statki);
@@ -65,6 +50,9 @@ int UtworzZapis(int trybGry,int tura, int czyja,Gracz gracz1, Gracz gracz2, mxml
 		dane = mxmlNewElement(informacje, "Ruchy");
 			wartosc = mxmlNewElement(dane, "Element");
 			mxmlNewInteger(wartosc, -1);
+		if (*drzewo) {
+			mxmlDelete(*drzewo);
+		}
 	*drzewo = xml;
 	FILE *fp;
 
@@ -156,6 +144,7 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
 		mxmlDelete(*xml);
 	}
 	*xml = drzewo;
+	//Odczytwyanie danych graczy
 	informacje = mxmlGetFirstChild(drzewo);
 	dane = mxmlFindPath(informacje, "Gracz1/Statki");
 	gracz1->statki = mxmlGetInteger(dane);
@@ -178,7 +167,7 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
-
+	//Wczytywanie listy ruchów
 	dane = mxmlFindPath(informacje, "Ruchy");
 	DodajdoListy(ruchy, start, 0, 0);
 	wartosc = mxmlGetLastChild(dane);
@@ -193,12 +182,14 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
 
 Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodzaj) {
 	Historia* temp = (Historia*)malloc(sizeof(Historia));
+	if (temp == 0) {
+		return 0;
+	}
 	temp->zadanie = zadanie;
 	temp->argument = argument;
 	temp->rodzaj = rodzaj;
 	temp->pPoprzednia = *lista;
 	*lista = temp;
-	
 	return *lista;
 }
 
@@ -216,17 +207,19 @@ void WypiszRuchy(Historia* ruchy) {
 
 	printf("Twoj przeciwnik zakonczyl ture.\nWykonane przez niego ruchy to:\n");
 	int i, iloscRuchow=0;
-	Historia* temp = 0;
+	Historia* ruchy_w_turze = 0;
+	Historia** enumerator;
 	while (ruchy->zadanie != start) {
 		iloscRuchow++;
-		DodajdoListy(&temp, strzal, ruchy->argument, ruchy->rodzaj);
+		DodajdoListy(&ruchy_w_turze, strzal, ruchy->argument, ruchy->rodzaj);
 		ruchy = ruchy->pPoprzednia;
 	}
+	enumerator = &ruchy_w_turze;
 	for (i = 1; i <= iloscRuchow; i++) {
-		printf("%d. Gracz strzelil w pole: %d. %s", i, temp->argument, temp->rodzaj ? "Trafil\n" : "Spudlowal\n");
-		temp = temp->pPoprzednia;
+		printf("%d. Gracz strzelil w pole: %d. %s", i, (*enumerator)->argument, (*enumerator)->rodzaj ? "Trafil\n" : "Spudlowal\n");
+		enumerator = &(*enumerator)->pPoprzednia;
 	}
-	UsunListe(&temp);
+	UsunListe(&ruchy_w_turze);
 
 }
 
@@ -252,11 +245,11 @@ void WyczyscBufor() {
 }
 
 void ZmienKolor(int typ) {
-#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
 #if defined(_WIN32)
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), typ);
 #endif
-#if defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
 	switch (typ)
 	{case BIALY:
 		printf(UBIALY);
@@ -275,29 +268,28 @@ void ZmienKolor(int typ) {
 	}
 #endif
 #else
-
+	//dla innych systemów nie zmienia koloru tekstu
 #endif
 }
 
 void Oczysc() {
-#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix)
+#if defined(_WIN32) || defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
 #if defined(_WIN32)
 	system("cls");
 #endif
-#if defined(unix) || defined(__unix__) || defined(__unix)
-	printf("\033[2J");
-	//system("clear");
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined(__linux__)
+	printf("\n");
+	system("clear");
+	system("clear");
 #endif
 #else
 	int i;
-	for (i = 0; i < 100; i++) {
+	for (i = 0; i < NO_SYS_NEWLINE; i++) {
 		printf("\n");
 	}
 
 #endif
 }
-
-
 
 void RysujPlansze(Gracz player, int dyskrecja) {
 	int i, j, c=0;
@@ -421,7 +413,6 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 	if (temp->zadanie == start) {
 		return 0;
 	}
-	printf("Debug error");
 	return -1;
 
 }
@@ -452,7 +443,6 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj
 		}
 		if (dane == -3) {
 			UsunStatek(historia, gracz);
-			//RysujPlansze(*gracz, 0);
 			switch (dlugosc)
 			{
 			case 4: printf("Ustaw czteromasztowiec:");
@@ -489,15 +479,19 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj
 
 int WprowadzZadanie(int liczbaArgumentow) {
 	char buffor[15];
-	int wynik, arg1,arg2;
+	int i, wynik, arg1,arg2;
 	do {
-		wynik = scanf("%14[^\n]", buffor);
+		wynik = scanf("%14[^\n]s", buffor);
 		if (liczbaArgumentow == 0 && getchar() == '\n') {
 			return 0;
 		}
 		WyczyscBufor();
 	} while (wynik != 1);
-		
+	//Zwiêkszenie zakresu poprawnych komend przez znormalizowanie tekstu
+	for (i = 0; buffor[i] != '\0'; i++) {
+		buffor[i] = tolower((unsigned char)buffor[i]);
+	}
+
 	if (!strcmp(buffor, "cofnij")) {
 		printf("\nproba cofania\n");
 		return -3;
@@ -554,19 +548,18 @@ void Rozmieszczenie(Gracz* gracz) {
 		printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, wprowadz dowolny znak");
 
 		komenda = WprowadzZadanie(0);
-		if (komenda == -2 || komenda == -4 || komenda == -5) {
+		if (komenda == ZAD_FLOTA || komenda == ZAD_ZAPISZ || komenda == ZAD_WCZYTAJ) {
 			printf("Nie mozna teraz wykonac tej akcji.\n");
 		}
-		else if (komenda == -3) {
+		else if (komenda == ZAD_COFNIJ) {
 			UsunStatek(&historia, gracz);
 			RysujPlansze(*gracz, 0);
 		}
-	} while (komenda != 0);
+	} while (komenda != ZAD_BRAK);
 	UsunListe(&historia);
 }
 void AutoRozmieszczenie(Gracz* gracz) {
 	gracz->statki = 04332224;
-	srand((int)(time(0)));
 	while (!UstawStatek(gracz, 4, rand() % 100, rand() % 2, -9));
 	while (!UstawStatek(gracz, 3, rand() % 100, rand() % 2, -8));
 	while (!UstawStatek(gracz, 3, rand() % 100, rand() % 2, -7));
@@ -584,16 +577,50 @@ void AutoRozmieszczenie(Gracz* gracz) {
 
 
 
-void WypelnijTablice(int poleGracza1[ROZMIAR_POLA][ROZMIAR_POLA], int poleGracza2[ROZMIAR_POLA][ROZMIAR_POLA]) {
+int WypelnijTablice(Gracz* gracz1, Gracz*gracz2) {
+	if((gracz1->pole = malloc(ROZMIAR_POLA * sizeof(int*)))==NULL) return 0;
+	if ((gracz2->pole = malloc(ROZMIAR_POLA * sizeof(int*))) == NULL) {
+		free(gracz1->pole);
+		return 0;
+	}
+	
 	int i, j, c = 0;
 	for (i = 0; i < ROZMIAR_POLA; i++) {
+		if ((gracz1->pole[i] = malloc(ROZMIAR_POLA * sizeof(int))) == NULL) {
+			break;
+		}
+		if ((gracz2->pole[i] = malloc(ROZMIAR_POLA * sizeof(int))) == NULL) {
+			free(gracz1->pole[i]);
+			break;
+		}
+	}
+	if (i < ROZMIAR_POLA) { 
+		//wyst¹pi³y b³êdy alokacji nale¿y usun¹æ dotychczas zaalokowan¹ pamiêæ
+		for (i--; i >= 0; i--) {
+			free(gracz1->pole[i]);
+			free(gracz2->pole[i]);
+		}
+		free(gracz1->pole);
+		free(gracz2->pole);
+		return 0;
+	}
+	for (i = 0; i < ROZMIAR_POLA; i++) {
 		for (j = 0; j < ROZMIAR_POLA; j++) {
-
-			poleGracza1[i][j] = poleGracza2[i][j] = c++;
-
+			gracz1->pole[i][j] = gracz2->pole[i][j] = c++;
 		}
 
 	}
+	return 1;
+}
+
+void UsunTablice(Gracz* gracz1, Gracz*gracz2) {
+	int i;
+	for (i = 0; i < ROZMIAR_POLA; i++) {
+		free(gracz1->pole[i]);
+		free(gracz2->pole[i]);
+	}
+	free(gracz1->pole);
+	free(gracz2->pole);
 }
 
 int Strzal(Gracz* atakowanyGracz, int pole) {
@@ -601,7 +628,7 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 	int y = pole % 10;
 
 	if (x<0 || x>=ROZMIAR_POLA || y<0 || y>=ROZMIAR_POLA) {
-		return 0;
+		return ST_BLAD;
 	}
 
 	if (atakowanyGracz->pole[x][y] <=-3 && atakowanyGracz->pole[x][y]>=-9) { //-3 1-masztowiec, (-6)do(-4) 2-maszztowiec, (-8)do(-7) 3-maszztowiec, -9 4-maszztowiec
@@ -632,16 +659,16 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 		atakowanyGracz->pole[x][y] = -1;
 		
 		if (((atakowanyGracz->statki / pozycja) % 8 == 0) || pozycja== 01) {
-			return 3;
+			return ST_ZATOP;
 		}
-		return 2;
+		return ST_CEL;
 	}
 	else if (atakowanyGracz->pole[x][y] < 0) {
-		return 0; 
+		return ST_BLAD; 
 	}
 	else {
 		atakowanyGracz->pole[x][y] = -2; //pudlo
-		return 1;
+		return ST_PUDLO;
 	}
 }
 
@@ -656,42 +683,38 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 	RysujPlansze(*gracz2, 1);
 	
 	
-
+	//pêtla do pobierania informacji. Jest z zawsze prawdziwym warunkiem aby jedyne co mog³o j¹ zatrzymaæ to zwrócenie wartoœæi funkcji
 	while (1) {
 		int cel,wynik;
 		printf("Gdzie strzelac: ");
 		do {
 			do {
 				cel = WprowadzZadanie(1);
-				if (cel == -4) {
-					printf("Proba zapisu \n");
+				if (cel == ZAD_ZAPISZ) {
 					if (Zapisz(*gracz1, *gracz2, xml,*ruchy)) {
 						printf("Udany zapis\n");
 						printf("Gdzie strzelac: ");
 						
 					}
 					else {
-						printf("Nieudane wczytywanie, sprawdz czy plik zapisu istnieje i nie jest otwarty.\n");
+						printf("Nieudane zapisywanie, sprawdz czy plik zapisu nie jest otwarty.\n");
 					}
 					cel = -1;
 					continue;
 				}
-				if (cel == -3) {
+				if (cel == ZAD_COFNIJ) {
 					printf("Nie mozna teraz wykonac tej akcji.\nPodaj inna komende lub miejsce strzalu:");
 					cel = -1;
 				}
-				if (cel == -2) {
+				if (cel == ZAD_FLOTA) {
 					WypiszFlote(gracz2);
 					cel = -1;
 					printf("Gdzie strzelac: ");
 				}
-				if (cel == -5) {
-					printf("Proba wczytywania \n");
+				if (cel == ZAD_WCZYTAJ) {
 					if (Wczytaj(gracz1, gracz2, xml,ruchy)){
 						printf("Udane wczytanie\n");
-						//RysujPlansze(*gracz1, 0);
-						//printf("Gdzie strzelac: ");
-						return 2;
+						return B_WCZYTAJ;
 						
 					}
 					else {
@@ -702,27 +725,27 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 				}
 			} while (cel == -1);
 			wynik = Strzal(gracz2, cel / 100);
-			if (wynik == 0) {
+			if (wynik == ST_BLAD) {
 				printf("W te pole nie mozna wycelowac. Podaj ponownie:");
 			}
-		}while (wynik == 0);
+		}while (wynik == ST_BLAD);
 
 		if (wynik > 1) {
-			if (wynik == 2)
+			if (wynik == ST_CEL)
 				printf("Trafiony!\n");
 			else
 				printf("Trafiony zatopiony!\n");
 			DodajdoListy(ruchy, strzal, cel / 100, 1);
 			RysujPlansze(*gracz2,1);
 			if (gracz2->statki == 0) {
-				return 0;
+				return B_KONIEC;
 			}
 		}	
 
-		if (wynik == 1) {
+		if (wynik == ST_PUDLO) {
 			printf("Pudlo :(\n");
 			DodajdoListy(ruchy, strzal, cel / 100, 0);
-			return 1;
+			return B_NIEKONIEC;
 		}
 		
 	}
@@ -730,7 +753,7 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 
 
 int Losuj(int poprzedniePole) {
-	return rand() % 100;
+	return rand() % (ROZMIAR_POLA*ROZMIAR_POLA);
 }
 
 int IdzN(int poprzedniePole) {
@@ -783,38 +806,38 @@ int BitwaAI(Gracz* atakowanyGracz, Wybor* AI, Historia** ruchy) {
 
 		} while (cel == -1 && AI->stanPoprzedni++);
 		wynik = Strzal(atakowanyGracz, cel);
-		if (wynik != 0) {
+		if (wynik != ST_BLAD) {
 			DodajdoListy(ruchy, strzal, cel, wynik - 1);
 		}
 		if (atakowanyGracz->statki == 0) {
-			return 0;
+			return B_KONIEC;
 		}
 		
-		if (wynik == 3) {//statek zosta³ zatopiony po strzle
+		if (wynik == ST_ZATOP) {//statek zosta³ zatopiony po strzle
 			AI->stanPoprzedni = 0;
 			continue;
 		}
-		if (wynik == 2 && AI->stanPoprzedni==3 ) { // gdy celowano na skos i trafiono odrazu przechodzi siê do nastêpnego
+		if (wynik == ST_CEL && AI->stanPoprzedni==3 ) { // gdy celowano na skos i trafiono odrazu przechodzi siê do nastêpnego
 			AI->stanPoprzedni++;
 			continue;
 		}
 		
 		if (AI->stanPoprzedni == 0) {
-			if (wynik == 2) {//trafiono, spróbuj znaleŸæ resztê statku
+			if (wynik == ST_CEL) {//trafiono, spróbuj znaleŸæ resztê statku
 				AI->stanPoprzedni++;
 			}
 
 		}
 		else {
 
-			if (wynik == 1) { //podczas szukania zmienia siê kierunek tylko podczas nietrafienia
+			if (wynik == ST_PUDLO) { //podczas szukania zmienia siê kierunek tylko podczas nietrafienia
 				AI->stanPoprzedni++;
 			}
 		}
 		
 		
-	} while (wynik != 1);
+	} while (wynik != ST_PUDLO);
 	
-	return 1;
+	return B_NIEKONIEC;
 }
 

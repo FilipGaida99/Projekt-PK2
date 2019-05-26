@@ -1,17 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #include "Funkcje.h"
-//#include <mxml.h>
+#include <time.h>
+
 #include "mxml-3.0/mxml.h"
 
 
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
 
 int main(int ileArg, char* arg[]) {
 	ZmienKolor(BIALY);
+	srand((int)time(NULL));
 	int trybGry = -1;
 	int automat = 0;
 	int wczytaj = 0;
@@ -37,14 +36,14 @@ int main(int ileArg, char* arg[]) {
 		int komenda;
 		do {
 			komenda = WprowadzZadanie(0);
-			if (komenda == -2 || komenda == -4 || komenda == -3) {
+			if (komenda == ZAD_FLOTA || komenda == ZAD_ZAPISZ || komenda == ZAD_COFNIJ) {
 				printf("Nie mozna teraz wykonac tej akcji.\n");
 			}
-			else if (komenda == -5) {
+			else if (komenda == ZAD_WCZYTAJ) {
 				wczytaj = 1;
 				break;
 			}
-		} while (komenda != 0);
+		} while (komenda != ZAD_BRAK);
 		if (wczytaj == 0) {
 			printf("Wybierz tryb gry. 0-gra z komputerem (wprowadz \"-1\" by umiescic statki automatycznie) lub 1-gra w dwie osoby(hotseat):");
 			do {
@@ -65,22 +64,28 @@ int main(int ileArg, char* arg[]) {
 			} while (trybGry != 0 && trybGry != 1);
 		}
 	}
-
 	Gracz gracz1;
 	Gracz gracz2;
 	mxml_node_t* xml=0;
 	mxml_node_t* tura_n;
 	mxml_node_t* czyja_n;
 	Historia* ruchy = 0;
+	if (WypelnijTablice(&gracz1, &gracz2) == 0) {
+		printf("Bledna alokacja pamieci. Sprobuj uruchomic ponownie.");
+		return 0;
+	}
 	if (wczytaj == 1) {//rozpoczêcie od wczytywania
+		
 		if (Wczytaj(&gracz1, &gracz2, &xml, &ruchy) == 0) {
+			
 			printf("Nie znaleziono zapisu lub plik z zapisem jest uszkodzony. \nSprobuj uruchomic gre ponownie lub zaczac od poczatku");
+			UsunTablice(&gracz1, &gracz2);
 			return 0;
 		}
+		
 		trybGry = mxmlGetInteger(mxmlFindPath(xml, "Informacje/Ustawienia/Tryb_Gry"));
 	}
 	else {//przygotowanie do gry
-		WypelnijTablice(gracz1.pole, gracz2.pole);
 		Oczysc();
 		if (automat == 0) {
 			Rozmieszczenie(&gracz1);
@@ -99,7 +104,7 @@ int main(int ileArg, char* arg[]) {
 			AutoRozmieszczenie(&gracz2);
 		}
 		
-		UtworzZapis(trybGry, 0, 1, gracz1, gracz2, &xml);
+		UtworzZapis(trybGry, gracz1, gracz2, &xml);
 	}
 	
 	
@@ -110,7 +115,7 @@ int main(int ileArg, char* arg[]) {
 	DodajdoListy(&ruchy, start, 0, 0);
 	int wynik1, wynik2;
 	if (trybGry == 1) {
-		int trigger= mxmlGetInteger(czyja_n);
+		int trigger= mxmlGetInteger(czyja_n);//zmienna steruj¹ca, pozwala pomin¹æ turê gracza pierwszego, je¿eli dane z pliku tego wymagaj¹.
 		do {
 			if (trigger != 2) {
 				tura = mxmlGetInteger(tura_n);
@@ -120,9 +125,9 @@ int main(int ileArg, char* arg[]) {
 				WyczyscBufor();
 				printf("Tura: %d \n", tura);
 				wynik1 = Bitwa(&gracz1, &gracz2, &xml, &ruchy);
-				if (wynik1 == 2) {
+				if (wynik1 == B_WCZYTAJ) {
 					if (mxmlGetInteger(czyja_n) == 1) {
-						wynik2 = 1;
+						wynik2 = 1;//instieje mo¿liwoœæ, ¿e zmienna zostanie u¿yta bez iniciacji dlatego odrazu iniciuje j¹ nie zmieniaj¹c¹ dzia³ania wartosci¹.
 						continue;
 					}
 					tura = mxmlGetInteger(tura_n);
@@ -138,7 +143,7 @@ int main(int ileArg, char* arg[]) {
 			WyczyscBufor();
 			printf("Tura: %d \n", tura);
 			wynik2 = Bitwa(&gracz2, &gracz1,&xml, &ruchy);
-			if (wynik2 == 2) {
+			if (wynik2 == B_WCZYTAJ) {
 				if (mxmlGetInteger(czyja_n) == 2) {
 					wynik1 = 1;
 					trigger = 2;
@@ -149,6 +154,7 @@ int main(int ileArg, char* arg[]) {
 		} while (wynik1 && wynik2);
 	}
 	if (trybGry == 0) {
+		//inicializacja sztucznej inteligencji
 		Wybor AI;
 		AI.aktualnePole = 0;
 		AI.stan[0] = Losuj;
@@ -163,7 +169,7 @@ int main(int ileArg, char* arg[]) {
 			tura = mxmlGetInteger(tura_n);
 			printf("Tura: %d \n", tura);
 			wynik1 = Bitwa(&gracz1, &gracz2, &xml,&ruchy);
-			if (wynik1 == 2) {//powstrzymanie komputera przed wykonaniem ruchu.
+			if (wynik1 == B_WCZYTAJ) {//powstrzymanie komputera przed wykonaniem ruchu.
 				wynik2 = 1;
 				continue;
 			}
@@ -172,7 +178,7 @@ int main(int ileArg, char* arg[]) {
 			mxmlSetInteger(tura_n, ++tura);
 		} while (wynik1 && wynik2);
 	}
-	if (wynik1 == 0) {
+	if (wynik1 == B_KONIEC) {
 		printf("Wygral pierwszy gracz");
 	}
 	else if(trybGry==1){
@@ -184,8 +190,6 @@ int main(int ileArg, char* arg[]) {
 	}
 	mxmlDelete(xml);
 	UsunListe(&ruchy);
-	_CrtDumpMemoryLeaks();
-	//usun¹æ
-	system("pause");
+	UsunTablice(&gracz1, &gracz2);
 	return 0;
 }

@@ -3,6 +3,12 @@
 #include <string.h>
 #include "Funkcje.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
+
+
 #if _WIN32
 #include <Windows.h>
 #endif
@@ -198,7 +204,7 @@ Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodz
 	temp->rodzaj = rodzaj;
 	temp->pPoprzednia = *lista;
 	*lista = temp;
-	
+	free(temp);//sprawdzic
 	return *lista;
 }
 

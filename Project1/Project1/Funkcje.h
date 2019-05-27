@@ -51,16 +51,23 @@ typedef struct {
 
 /**struktura obs³uguj¹ca sztuczn¹ inteligencjê. */
 typedef struct {
+	//Indeks informuj¹cy, który z elementów tablicy  wskaŸników na funkcje bêdzie u¿ywany w trakcie decyzji
 	int stanPoprzedni;
+	//Tablica wskaŸników na funkcje steruj¹ce ostrza³em
 	int(*stan[6])(int poprzedniePole);
+	//Koordynaty pola na które ostatnio celowano
 	int aktualnePole;
 }Wybor;
 
 /**Lista dynamicza, bêd¹ca histori¹ ruchów, które zosta³y wykonane. */
 typedef struct Lista{
+	//Zmienna s³u¿¹ca jako etykieta dla danego ruchu
 	Zadanie zadanie;
+	//Argument jakiego u¿yto podczas wykonywania ruchu.
 	int argument;
+	//Pomocniczy argument dla niektórych typów ruchu
 	int rodzaj;
+	//WskaŸnik na poprzedni element w liœcie
 	struct Lista* pPoprzednia;
 }Historia;
 
@@ -76,14 +83,14 @@ void RysujPlansze(Gracz gracz, int dyskrecja);
 */
 void Rozmieszczenie(Gracz* gracz);
 /**Funkcja rozpoczyna przygotowanie do gry losowo umieszczaj¹c wszystkie statki.
-@param gracz Gracz, którego pole gry bêdzie ustalane poprzez losowe rozmieszczenie statków.
+@param gracz Gracz, którego pole gry bêdzie ustalane poprzez losowe rozmieszczenie statków
 */
 void AutoRozmieszczenie(Gracz* gracz);
 /**Procedura alokowania i wype³nienia tablic bêd¹ch planszami dla graczy. Tablice alokowane s¹ dynamicznie korzystaj¹c z rozmiaru okreœlonego w makro ROZMIAR_POLA. Gdy alokacja pamiêci bêdzie niemo¿liwa, funkcja zwolni zaalokowan¹ przez ni¹ pamiêæ.
 @param gracz1 Gracz, którego tablicê nale¿y wype³niæ
-@param gracz2 Gracz, którego tablicê nale¿y wype³niæ. Powinien byæ rózny od gracza pierwszego.
+@param gracz2 Gracz, którego tablicê nale¿y wype³niæ. Powinien byæ rózny od gracza pierwszego
 @return 1, gdy alokacja zakoñczy³a siê sukcesem
-@return 0, gdy wyst¹pi³y b³êdy alokacji. Pamiêæ zaalokowana do b³êdu zostanie w funkcji zwolniona.
+@return 0, gdy wyst¹pi³y b³êdy alokacji. Pamiêæ zaalokowana do b³êdu zostanie w funkcji zwolniona
 */
 int WypelnijTablice(Gracz* gracz1, Gracz*gracz2);
 
@@ -109,18 +116,18 @@ int UsunStatek(Historia** historia, Gracz* gracz);
 
 /**Procedura usuwania dynamicznie zaalokownaych tablic.
 @param gracz1 Gracz, którego tablicê nale¿y wype³niæ
-@param gracz2 Gracz, którego tablicê nale¿y wype³niæ. Powinien byæ rózny od gracza pierwszego.
+@param gracz2 Gracz, którego tablicê nale¿y wype³niæ. Powinien byæ rózny od gracza pierwszego
 */
 void UsunTablice(Gracz* gracz1, Gracz*gracz2);
 
 
 /**Funckja sprawdzaj¹ca czy strza³ jest mo¿liwy do wykonanania oraz zwracaj¹ca informacja o tym jaki by³ wynik strza³u.
-@param atakowanyGracz Gracz, w którego pole zostanie wykonany strza³.
+@param atakowanyGracz Gracz, w którego pole zostanie wykonany strza³
 @param pole Pole, w które nale¿y strzeliæ. Koordynaty s¹ podane jako liczba dwucyfrowa. Pierwsza cyfra okreœla pole na osi X, a druga na osi Y
 @return 0 (ST_BLAD) Informacja o tym, ¿e strza³ nie mo¿e sotaæ wykonany w podane pole
 @return 1 (ST_PUDLO) Informacja o tym, ¿e strza³ zosta³ wykonany poprawnie w pole na którym nie by³o statku
 @return 2 (ST_CEL) Informacja o tym, ¿e strza³ zosta³ wykonany poprawnie w pole na którym znajdowa³ siê statek
-#define 3 (ST_ZATOP) Informacja o tym, ¿e strza³ zosta³ wykonany poprawnie oraz statek, który trafiono zosta³ zatopiony
+@return 3 (ST_ZATOP) Informacja o tym, ¿e strza³ zosta³ wykonany poprawnie oraz statek, który trafiono zosta³ zatopiony
 */
 int Strzal(Gracz* atakowanyGracz, int pole);
 /**Komunikacja z u¿ytkownikiem po zakoñczeniu przygotowañ. Pojedyncze wywo³anie jest pojedyncz¹ tur¹ jednego gracza
@@ -129,14 +136,15 @@ int Strzal(Gracz* atakowanyGracz, int pole);
 @param xml Drzewo obs³ugiwane przez bibilotekê Mini-XML. Parametr potrzebny do zapisywania i wczytywania gry w trakcie rozgrywki
 @param ruchy Historia ruchów gracza. Wykonane ruchy zostan¹ wyœwielone na pocz¹tku tury przeciwnika
 @return 0 (B_KONIEC) Informacja o tym, ¿e jeden z graczy straci³ wszystkie statki. Wartoœæ ta koñczy pêtle gry
-@return 1 (B_NIEKONIEC) Informacja o tym, ¿e ka¿dy gracz ma jeszcze statki.
-@return 2 (B_WCZYTAJ) Wartoœæ zwracana w przypadku udanego wcytania gry. 
+@return 1 (B_NIEKONIEC) Informacja o tym, ¿e ka¿dy gracz ma jeszcze statki
+@return 2 (B_WCZYTAJ) Wartoœæ zwracana w przypadku udanego wcytania gry 
 */
 int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy);
 /**Funkcja czyszcz¹ca konsolê. Zabezpieczenie przed podgl¹daniem pól przeciwnika. W przyadku nieobs³ugiwanego systemu operacyjnego funkcja wypisze dostateczn¹ iloœæ nowych linii, aby gracze nie widzieli w swojej turze statków przeciwnika.
 */
 void Oczysc();
 /**Funkcja zmieniaj¹ca kolor tekstu. Ma zastosowanie estetyczne. Dla nieobs³ugiwanych systemów nie wykona ¿adnej instrukcji.
+@param typ Kod koloru na który zostanie zamieniony kolor tekstu w konsoli
 */ 
 void ZmienKolor(int typ);
 /**Funkcja do daj¹ca element do listy na jej pocz¹tek.
@@ -145,11 +153,11 @@ void ZmienKolor(int typ);
 @param argument Informacja do zapsiania na liœcie. Mo¿e byæ dowolna, ale zosta³a przygotowana na koordynaty
 @param rodzaj informacja do zapsiania na liœcie. Mo¿e byæ dowolna, ale zosta³a przygotowana na kierunek ustawienia statku lub wynik strza³u
 @return Wskaznik na liste
-@return NULL, gdy nie uda³o siê zaalokowaæ pamiêci.
+@return NULL, gdy nie uda³o siê zaalokowaæ pamiêci
 */
 Historia* DodajdoListy(Historia** lista, Zadanie zadanie, int argument, int rodzaj);
 /**Funkcja do komunikacji z u¿ytkownikiem, pozwalaj¹ca na u¿ywanie komend w dowolnej chwili. Po wprowadzeniu komendy wypisuje informacje, które dzia³anie próbowano wykonaæ.
-@param liczbaAgumentow Parametr okreœlaj¹cy jak du¿o danych chcemy otrzymaæ. Dla 0 wymaga naciœniêcia klawisza "Enter", dla 1 wymaga jednej wartoœci, dla 2 dwóch wartoœci. Inne wartoœci nie s¹ obs³ugiwane
+@param liczbaArgumentow Parametr okreœlaj¹cy jak du¿o danych chcemy otrzymaæ. Dla 0 wymaga naciœniêcia klawisza "Enter", dla 1 wymaga jednej wartoœci, dla 2 dwóch wartoœci. Inne wartoœci nie s¹ obs³ugiwane
 @return  -2 (ZAD_FLOTA) Zwracana, gdy u¿yto komendy "flota"
 @return -3 (ZAD_COFNIJ)	Zwracana, gdy u¿yto komendy "cofnij"
 @return -4 (ZAD_ZAPISZ) Zwracana, gdy u¿yto komendy "zapisz"

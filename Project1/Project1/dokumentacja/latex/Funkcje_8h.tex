@@ -1,0 +1,615 @@
+\hypertarget{Funkcje_8h}{}\subsection{Dokumentacja pliku Funkcje.\+h}
+\label{Funkcje_8h}\index{Funkcje.\+h@{Funkcje.\+h}}
+{\ttfamily \#include \char`\"{}mxml-\/3.\+0/mxml.\+h\char`\"{}}\newline
+\subsubsection*{Struktury danych}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structGracz}{Gracz}}
+\item 
+struct \mbox{\hyperlink{structWybor}{Wybor}}
+\item 
+struct \mbox{\hyperlink{structLista}{Lista}}
+\end{DoxyCompactItemize}
+\subsubsection*{Definicje}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a83dd2b9beb7e612f04dedacb39331bbc}\label{Funkcje_8h_a83dd2b9beb7e612f04dedacb39331bbc}} 
+\#define {\bfseries R\+O\+Z\+M\+I\+A\+R\+\_\+\+P\+O\+LA}~10
+\item 
+\mbox{\Hypertarget{Funkcje_8h_ac26fa6e36e3e22472c4853e01c4de5b9}\label{Funkcje_8h_ac26fa6e36e3e22472c4853e01c4de5b9}} 
+\#define {\bfseries N\+O\+\_\+\+S\+Y\+S\+\_\+\+N\+E\+W\+L\+I\+NE}~100
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a2fbb50484a293e6f1466c68b1b008cf1}\label{Funkcje_8h_a2fbb50484a293e6f1466c68b1b008cf1}} 
+\#define {\bfseries Z\+A\+D\+\_\+\+F\+L\+O\+TA}~-\/2
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a168a3166fe3e0c14b9cb0212c1f53735}\label{Funkcje_8h_a168a3166fe3e0c14b9cb0212c1f53735}} 
+\#define {\bfseries Z\+A\+D\+\_\+\+C\+O\+F\+N\+IJ}~-\/3
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a89d563db75464ec57c6b007fb1918f16}\label{Funkcje_8h_a89d563db75464ec57c6b007fb1918f16}} 
+\#define {\bfseries Z\+A\+D\+\_\+\+Z\+A\+P\+I\+SZ}~-\/4
+\item 
+\mbox{\Hypertarget{Funkcje_8h_aa23fb4da7801235f649f95ffdb2b79c5}\label{Funkcje_8h_aa23fb4da7801235f649f95ffdb2b79c5}} 
+\#define {\bfseries Z\+A\+D\+\_\+\+W\+C\+Z\+Y\+T\+AJ}~-\/5
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a3dd9309503eb986c423f138b3564ae4d}\label{Funkcje_8h_a3dd9309503eb986c423f138b3564ae4d}} 
+\#define {\bfseries Z\+A\+D\+\_\+\+B\+R\+AK}~0
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a7829d72cd0ec3cbd9d7fa55188b1f942}\label{Funkcje_8h_a7829d72cd0ec3cbd9d7fa55188b1f942}} 
+\#define {\bfseries B\+\_\+\+K\+O\+N\+I\+EC}~0
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a7e7b2cb52b3e0320009f4070196ce2dd}\label{Funkcje_8h_a7e7b2cb52b3e0320009f4070196ce2dd}} 
+\#define {\bfseries B\+\_\+\+N\+I\+E\+K\+O\+N\+I\+EC}~1
+\item 
+\mbox{\Hypertarget{Funkcje_8h_af298d87180dc23a0930eb148b6edb94a}\label{Funkcje_8h_af298d87180dc23a0930eb148b6edb94a}} 
+\#define {\bfseries B\+\_\+\+W\+C\+Z\+Y\+T\+AJ}~2
+\item 
+\mbox{\Hypertarget{Funkcje_8h_ac36690111d192d350d614cb178ff956d}\label{Funkcje_8h_ac36690111d192d350d614cb178ff956d}} 
+\#define {\bfseries S\+T\+\_\+\+B\+L\+AD}~0
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a573cdcfc9bfc37f54fb231ed57345910}\label{Funkcje_8h_a573cdcfc9bfc37f54fb231ed57345910}} 
+\#define {\bfseries S\+T\+\_\+\+P\+U\+D\+LO}~1
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a03c8d06a1a34104d3983c48bfef3e08e}\label{Funkcje_8h_a03c8d06a1a34104d3983c48bfef3e08e}} 
+\#define {\bfseries S\+T\+\_\+\+C\+EL}~2
+\item 
+\mbox{\Hypertarget{Funkcje_8h_ab93b61876647f9f5400e608c6e7b87c8}\label{Funkcje_8h_ab93b61876647f9f5400e608c6e7b87c8}} 
+\#define {\bfseries S\+T\+\_\+\+Z\+A\+T\+OP}~3
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a7c9a30ac1124771324fecc44196ede21}\label{Funkcje_8h_a7c9a30ac1124771324fecc44196ede21}} 
+\#define {\bfseries Z\+I\+E\+L\+O\+NY}~10
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a8a7e640199e713158f91b6b6d32b9b8d}\label{Funkcje_8h_a8a7e640199e713158f91b6b6d32b9b8d}} 
+\#define {\bfseries C\+Z\+E\+R\+W\+O\+NY}~12
+\item 
+\mbox{\Hypertarget{Funkcje_8h_a87ae10a1a2892293144ce14788cda61b}\label{Funkcje_8h_a87ae10a1a2892293144ce14788cda61b}} 
+\#define {\bfseries N\+I\+E\+B\+I\+E\+S\+KI}~11
+\item 
+\mbox{\Hypertarget{Funkcje_8h_ad427cca3bab32f9a7ba9d5587c77e1a8}\label{Funkcje_8h_ad427cca3bab32f9a7ba9d5587c77e1a8}} 
+\#define {\bfseries B\+I\+A\+LY}~15
+\end{DoxyCompactItemize}
+\subsubsection*{Definicje typów}
+\begin{DoxyCompactItemize}
+\item 
+typedef enum \mbox{\hyperlink{Funkcje_8h_aa2a1288a7ec8a827f2c3f57ca0c7acab}{Dzialania}} \mbox{\hyperlink{Funkcje_8h_a8f8e0d34a9d3b508b7290a6300dbae08}{Zadanie}}
+\item 
+typedef struct \mbox{\hyperlink{structLista}{Lista}} \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}}
+\end{DoxyCompactItemize}
+\subsubsection*{Wyliczenia}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{Funkcje_8h_aa2a1288a7ec8a827f2c3f57ca0c7acab}{Dzialania}} \{ {\bfseries start}, 
+{\bfseries ustaw}, 
+{\bfseries strzal}
+ \}
+\end{DoxyCompactItemize}
+\subsubsection*{Funkcje}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a812971029754230ff400e251bdecac29}{Wyczysc\+Bufor}} ()
+\item 
+void \mbox{\hyperlink{Funkcje_8h_af63ea4764dbf6516e2f6c874205a53c3}{Rysuj\+Plansze}} (\mbox{\hyperlink{structGracz}{Gracz}} gracz, int dyskrecja)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a8e13d12acf4bd5dc9ccc7bc10b903ea8}{Rozmieszczenie}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a55e7407783f45ad0e0398fe77bbd4591}{Auto\+Rozmieszczenie}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a84aa6a449c0f2d5ca7e6a88d414fe6db}{Wypelnij\+Tablice}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz1, \mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz2)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a9d249d3f82dd348832d04158e42d6698}{Ustaw\+Statek}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz, int dlugosc, int pole, int kierunek, int rodzaj\+Statku)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a59690bbceeb5a354133089ef22a98764}{Usun\+Statek}} (\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$historia, \mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a38713848d4bb49d9e8148e0e3281d23d}{Usun\+Tablice}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz1, \mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz2)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a0f26054892f7167430a79d5cc304a9aa}{Strzal}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$atakowany\+Gracz, int pole)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a513fa87c991a7f81624269af246e64c7}{Bitwa}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz1, \mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz2, mxml\+\_\+node\+\_\+t $\ast$$\ast$xml, \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$ruchy)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a556e54452713fd9e0e46d22d656acd84}{Oczysc}} ()
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a7f6f898cce85842d7885dd851bf339f7}{Zmien\+Kolor}} (int typ)
+\item 
+\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$ \mbox{\hyperlink{Funkcje_8h_a1d505743a3ea8a98c1ef3d444b5a2ff3}{Dodajdo\+Listy}} (\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$lista, \mbox{\hyperlink{Funkcje_8h_a8f8e0d34a9d3b508b7290a6300dbae08}{Zadanie}} zadanie, int argument, int rodzaj)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a1a08160abc9e2621b2e81fa92880118f}{Wprowadz\+Zadanie}} (int liczba\+Argumentow)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a55cd579e7766f0d10670af83f6851329}{Usun\+Liste}} (\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$lista)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_ac5c95fbf1f4e025d6ca9598e98771bd8}{Wypisz\+Flote}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$przeciwnik)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_ab9eac42cddbb3e9014ca1ff6b4cde999}{Wypisz\+Ruchy}} (\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$ruchy)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a4132df12099fff8a14ae665774cffc76}{Losuj}} (int poprzednie\+Pole)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a6305dab3c26df8c3d680d26c03c8088d}{IdzN}} (int poprzednie\+Pole)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_abd2f6f6ec35f57b9ddc3e6e9d4f998d0}{IdzS}} (int poprzednie\+Pole)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a9dc7f3c4b7373a278b06d9670c1f73e5}{IdzE}} (int poprzednie\+Pole)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a37ed70afcbae7b807b219c19eb126ce0}{IdzW}} (int poprzednie\+Pole)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a720cce3e60286545c5de59343c37ba8d}{Idz\+Skos}} (int poprzednie\+Pole)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a8ad43acf5f9af76986d68c76712f2bbe}{Bitwa\+AI}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$atakowany\+Gracz, \mbox{\hyperlink{structWybor}{Wybor}} $\ast$AI, \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$ruchy)
+\item 
+void \mbox{\hyperlink{Funkcje_8h_a8aca7178147d0d520ad115431dcafb4f}{Pobierz\+Koordynaty}} (int dlugosc, \mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz, \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$historia, int rodzaj)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_aa63004000aaecdfead8c879014c561c3}{Utworz\+Zapis}} (int tryb\+Gry, \mbox{\hyperlink{structGracz}{Gracz}} gracz1, \mbox{\hyperlink{structGracz}{Gracz}} gracz2, mxml\+\_\+node\+\_\+t $\ast$$\ast$xml)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_af26c9ce290837bb4c8be38e046fd9a7d}{Zapisz}} (\mbox{\hyperlink{structGracz}{Gracz}} gracz1, \mbox{\hyperlink{structGracz}{Gracz}} gracz2, mxml\+\_\+node\+\_\+t $\ast$$\ast$xml, \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$ruchy)
+\item 
+int \mbox{\hyperlink{Funkcje_8h_a66f34b463dc19f1003b7f5c0f076da1d}{Wczytaj}} (\mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz1, \mbox{\hyperlink{structGracz}{Gracz}} $\ast$gracz2, mxml\+\_\+node\+\_\+t $\ast$$\ast$xml, \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$ruchy)
+\end{DoxyCompactItemize}
+
+
+\subsubsection{Dokumentacja definicji typów}
+\mbox{\Hypertarget{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}\label{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Historia@{Historia}}
+\index{Historia@{Historia}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Historia}{Historia}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structLista}{Lista}} \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}}}
+
+\mbox{\hyperlink{structLista}{Lista}} dynamicza, będąca historią ruchów, które zostały wykonane. \mbox{\Hypertarget{Funkcje_8h_a8f8e0d34a9d3b508b7290a6300dbae08}\label{Funkcje_8h_a8f8e0d34a9d3b508b7290a6300dbae08}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Zadanie@{Zadanie}}
+\index{Zadanie@{Zadanie}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Zadanie}{Zadanie}}
+{\footnotesize\ttfamily typedef enum \mbox{\hyperlink{Funkcje_8h_aa2a1288a7ec8a827f2c3f57ca0c7acab}{Dzialania}} \mbox{\hyperlink{Funkcje_8h_a8f8e0d34a9d3b508b7290a6300dbae08}{Zadanie}}}
+
+typ wyliczeniowy określający jaka czynność została wykonana. 
+
+\subsubsection{Dokumentacja typów wyliczanych}
+\mbox{\Hypertarget{Funkcje_8h_aa2a1288a7ec8a827f2c3f57ca0c7acab}\label{Funkcje_8h_aa2a1288a7ec8a827f2c3f57ca0c7acab}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Dzialania@{Dzialania}}
+\index{Dzialania@{Dzialania}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Dzialania}{Dzialania}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{Funkcje_8h_aa2a1288a7ec8a827f2c3f57ca0c7acab}{Dzialania}}}
+
+typ wyliczeniowy określający jaka czynność została wykonana. 
+
+\subsubsection{Dokumentacja funkcji}
+\mbox{\Hypertarget{Funkcje_8h_a55e7407783f45ad0e0398fe77bbd4591}\label{Funkcje_8h_a55e7407783f45ad0e0398fe77bbd4591}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Auto\+Rozmieszczenie@{Auto\+Rozmieszczenie}}
+\index{Auto\+Rozmieszczenie@{Auto\+Rozmieszczenie}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Auto\+Rozmieszczenie()}{AutoRozmieszczenie()}}
+{\footnotesize\ttfamily void Auto\+Rozmieszczenie (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz }\end{DoxyParamCaption})}
+
+Funkcja rozpoczyna przygotowanie do gry losowo umieszczając wszystkie statki. 
+\begin{DoxyParams}{Parametry}
+{\em gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, którego pole gry będzie ustalane poprzez losowe rozmieszczenie statków \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_a513fa87c991a7f81624269af246e64c7}\label{Funkcje_8h_a513fa87c991a7f81624269af246e64c7}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Bitwa@{Bitwa}}
+\index{Bitwa@{Bitwa}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Bitwa()}{Bitwa()}}
+{\footnotesize\ttfamily int Bitwa (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz1,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz2,  }\item[{mxml\+\_\+node\+\_\+t $\ast$$\ast$}]{xml,  }\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$}]{ruchy }\end{DoxyParamCaption})}
+
+Komunikacja z użytkownikiem po zakończeniu przygotowań. Pojedyncze wywołanie jest pojedynczą turą jednego gracza 
+\begin{DoxyParams}{Parametry}
+{\em gracz1} & \mbox{\hyperlink{structGracz}{Gracz}}, którego tura powinna być wykonana \\
+\hline
+{\em gracz2} & \mbox{\hyperlink{structGracz}{Gracz}}, który będzie przeciwnikiem dla gracz1. Powinien być rózny od gracza pierwszego \\
+\hline
+{\em xml} & Drzewo obsługiwane przez bibilotekę Mini-\/\+X\+ML. Parametr potrzebny do zapisywania i wczytywania gry w trakcie rozgrywki \\
+\hline
+{\em ruchy} & Historia ruchów gracza. Wykonane ruchy zostaną wyświelone na początku tury przeciwnika \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+0 (B\+\_\+\+K\+O\+N\+I\+EC) Informacja o tym, że jeden z graczy stracił wszystkie statki. Wartość ta kończy pętle gry 
+
+1 (B\+\_\+\+N\+I\+E\+K\+O\+N\+I\+EC) Informacja o tym, że każdy gracz ma jeszcze statki 
+
+2 (B\+\_\+\+W\+C\+Z\+Y\+T\+AJ) Wartość zwracana w przypadku udanego wcytania gry 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a8ad43acf5f9af76986d68c76712f2bbe}\label{Funkcje_8h_a8ad43acf5f9af76986d68c76712f2bbe}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Bitwa\+AI@{Bitwa\+AI}}
+\index{Bitwa\+AI@{Bitwa\+AI}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Bitwa\+A\+I()}{BitwaAI()}}
+{\footnotesize\ttfamily int Bitwa\+AI (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{atakowany\+Gracz,  }\item[{\mbox{\hyperlink{structWybor}{Wybor}} $\ast$}]{AI,  }\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$}]{ruchy }\end{DoxyParamCaption})}
+
+Funkcja obsługująca turę dla gry z komputerem. 
+\begin{DoxyParams}{Parametry}
+{\em atakowany\+Gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, który jest przeciwnikiem komputera \\
+\hline
+{\em AI} & Struktura posiadająca zainicjowaną tablice wskaźników na funckje celujące oraz indeks następnej funkcji do wykonania \\
+\hline
+{\em ruchy} & Historia ruchów gracza. Wykonane ruchy zostaną wyświelone na początku tury przeciwnika \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+0 (B\+\_\+\+K\+O\+N\+I\+EC) Informacja o tym, że jeden z graczy stracił wszystkie statki. Wartość ta kończy pętle gry 
+
+1 (B\+\_\+\+N\+I\+E\+K\+O\+N\+I\+EC) Informacja o tym, że każdy gracz ma jeszcze statki. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a1d505743a3ea8a98c1ef3d444b5a2ff3}\label{Funkcje_8h_a1d505743a3ea8a98c1ef3d444b5a2ff3}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Dodajdo\+Listy@{Dodajdo\+Listy}}
+\index{Dodajdo\+Listy@{Dodajdo\+Listy}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Dodajdo\+Listy()}{DodajdoListy()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}}$\ast$ Dodajdo\+Listy (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$}]{lista,  }\item[{\mbox{\hyperlink{Funkcje_8h_a8f8e0d34a9d3b508b7290a6300dbae08}{Zadanie}}}]{zadanie,  }\item[{int}]{argument,  }\item[{int}]{rodzaj }\end{DoxyParamCaption})}
+
+Funkcja do dająca element do listy na jej początek. 
+\begin{DoxyParams}{Parametry}
+{\em lista} & Wskaźnik na listę do której należy dodać element \\
+\hline
+{\em zadanie} & Wartość określa jaki typ ruchy został wykonany. \\
+\hline
+{\em argument} & Informacja do zapsiania na liście. Może być dowolna, ale została przygotowana na koordynaty \\
+\hline
+{\em rodzaj} & informacja do zapsiania na liście. Może być dowolna, ale została przygotowana na kierunek ustawienia statku lub wynik strzału \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+Wskaznik na liste 
+
+N\+U\+LL, gdy nie udało się zaalokować pamięci 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a9dc7f3c4b7373a278b06d9670c1f73e5}\label{Funkcje_8h_a9dc7f3c4b7373a278b06d9670c1f73e5}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!IdzE@{IdzE}}
+\index{IdzE@{IdzE}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Idz\+E()}{IdzE()}}
+{\footnotesize\ttfamily int IdzE (\begin{DoxyParamCaption}\item[{int}]{poprzednie\+Pole }\end{DoxyParamCaption})}
+
+Funckja przenosząca celowanie o jedno pole w prawo. 
+\begin{DoxyParams}{Parametry}
+{\em poprzednie\+Pole} & Poprzednie pole w które celowano \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+Nowe pole, w które należy wycelować 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a6305dab3c26df8c3d680d26c03c8088d}\label{Funkcje_8h_a6305dab3c26df8c3d680d26c03c8088d}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!IdzN@{IdzN}}
+\index{IdzN@{IdzN}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Idz\+N()}{IdzN()}}
+{\footnotesize\ttfamily int IdzN (\begin{DoxyParamCaption}\item[{int}]{poprzednie\+Pole }\end{DoxyParamCaption})}
+
+Funkcja przenosząca celowanie o jedno pole do góry. 
+\begin{DoxyParams}{Parametry}
+{\em poprzednie\+Pole} & Poprzednie pole w które celowano \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+Nowe pole, w które należy wycelować 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_abd2f6f6ec35f57b9ddc3e6e9d4f998d0}\label{Funkcje_8h_abd2f6f6ec35f57b9ddc3e6e9d4f998d0}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!IdzS@{IdzS}}
+\index{IdzS@{IdzS}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Idz\+S()}{IdzS()}}
+{\footnotesize\ttfamily int IdzS (\begin{DoxyParamCaption}\item[{int}]{poprzednie\+Pole }\end{DoxyParamCaption})}
+
+Funkcja przenosząca celowanie o jedno pole w dół. 
+\begin{DoxyParams}{Parametry}
+{\em poprzednie\+Pole} & Poprzednie pole w które celowano \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+Nowe pole, w które należy wycelować 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a720cce3e60286545c5de59343c37ba8d}\label{Funkcje_8h_a720cce3e60286545c5de59343c37ba8d}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Idz\+Skos@{Idz\+Skos}}
+\index{Idz\+Skos@{Idz\+Skos}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Idz\+Skos()}{IdzSkos()}}
+{\footnotesize\ttfamily int Idz\+Skos (\begin{DoxyParamCaption}\item[{int}]{poprzednie\+Pole }\end{DoxyParamCaption})}
+
+Funkcja przenosząca celowanie o jedno pole w prawo i jedno w dół. 
+\begin{DoxyParams}{Parametry}
+{\em poprzednie\+Pole} & Poprzednie pole w które celowano \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+Nowe pole, w które należy wycelować 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a37ed70afcbae7b807b219c19eb126ce0}\label{Funkcje_8h_a37ed70afcbae7b807b219c19eb126ce0}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!IdzW@{IdzW}}
+\index{IdzW@{IdzW}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Idz\+W()}{IdzW()}}
+{\footnotesize\ttfamily int IdzW (\begin{DoxyParamCaption}\item[{int}]{poprzednie\+Pole }\end{DoxyParamCaption})}
+
+Funckja przenosząca celowanie o jedno pole w lewo. 
+\begin{DoxyParams}{Parametry}
+{\em poprzednie\+Pole} & Poprzednie pole w które celowano \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+Nowe pole, w które należy wycelować 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a4132df12099fff8a14ae665774cffc76}\label{Funkcje_8h_a4132df12099fff8a14ae665774cffc76}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Losuj@{Losuj}}
+\index{Losuj@{Losuj}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Losuj()}{Losuj()}}
+{\footnotesize\ttfamily int Losuj (\begin{DoxyParamCaption}\item[{int}]{poprzednie\+Pole }\end{DoxyParamCaption})}
+
+Funckcja losująca koordynaty dla algorytmu celowania komputera. 
+\begin{DoxyParams}{Parametry}
+{\em poprzednie\+Pole} & Poprzednie pole w które celowano \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+Nowe pole, w które należy wycelować 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a556e54452713fd9e0e46d22d656acd84}\label{Funkcje_8h_a556e54452713fd9e0e46d22d656acd84}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Oczysc@{Oczysc}}
+\index{Oczysc@{Oczysc}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Oczysc()}{Oczysc()}}
+{\footnotesize\ttfamily void Oczysc (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Funkcja czyszcząca konsolę. Zabezpieczenie przed podglądaniem pól przeciwnika. W przyadku nieobsługiwanego systemu operacyjnego funkcja wypisze dostateczną ilość nowych linii, aby gracze nie widzieli w swojej turze statków przeciwnika. \mbox{\Hypertarget{Funkcje_8h_a8aca7178147d0d520ad115431dcafb4f}\label{Funkcje_8h_a8aca7178147d0d520ad115431dcafb4f}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Pobierz\+Koordynaty@{Pobierz\+Koordynaty}}
+\index{Pobierz\+Koordynaty@{Pobierz\+Koordynaty}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Pobierz\+Koordynaty()}{PobierzKoordynaty()}}
+{\footnotesize\ttfamily void Pobierz\+Koordynaty (\begin{DoxyParamCaption}\item[{int}]{dlugosc,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz,  }\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$}]{historia,  }\item[{int}]{rodzaj }\end{DoxyParamCaption})}
+
+Funkcja pobiera od użytkownika informacje gdzie powinien zostać umieszczony pojedyczy statek. 
+\begin{DoxyParams}{Parametry}
+{\em dlugosc} & Długość statku, który należy umieścić \\
+\hline
+{\em gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, który aktualnie ustawia statki \\
+\hline
+{\em historia} & \mbox{\hyperlink{structLista}{Lista}} ruchów gracza. Pozwala na cofanie statków \\
+\hline
+{\em rodzaj} & identyfikator statku. Ta wartość zostanie wpisana na pole w momencie ustawiania statku \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_a8e13d12acf4bd5dc9ccc7bc10b903ea8}\label{Funkcje_8h_a8e13d12acf4bd5dc9ccc7bc10b903ea8}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Rozmieszczenie@{Rozmieszczenie}}
+\index{Rozmieszczenie@{Rozmieszczenie}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Rozmieszczenie()}{Rozmieszczenie()}}
+{\footnotesize\ttfamily void Rozmieszczenie (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz }\end{DoxyParamCaption})}
+
+Funkcja rozpoczyna przygotowanie do gry w przypadku, gdy nie rozpoczęto od wczytania zapisu. Funkcja komunikuje się z użytkwonikiem przez konsole. 
+\begin{DoxyParams}{Parametry}
+{\em gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, którego pole gry będzie ustalane na podstawie informacji otrzymywanych od użytkownika \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_af63ea4764dbf6516e2f6c874205a53c3}\label{Funkcje_8h_af63ea4764dbf6516e2f6c874205a53c3}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Rysuj\+Plansze@{Rysuj\+Plansze}}
+\index{Rysuj\+Plansze@{Rysuj\+Plansze}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Rysuj\+Plansze()}{RysujPlansze()}}
+{\footnotesize\ttfamily void Rysuj\+Plansze (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}}}]{gracz,  }\item[{int}]{dyskrecja }\end{DoxyParamCaption})}
+
+Funkcja wyświetlająca graczowi planszę jego lub przeciwnika. 
+\begin{DoxyParams}{Parametry}
+{\em gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, którego planszę należy wyświetlić \\
+\hline
+{\em dyskrecja} & Parametr określający czy należy wyświetlić statki. Dla zmiennej równej 0, statki są wyświetlane, w przeciwnym wypadku są pomijane. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_a0f26054892f7167430a79d5cc304a9aa}\label{Funkcje_8h_a0f26054892f7167430a79d5cc304a9aa}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Strzal@{Strzal}}
+\index{Strzal@{Strzal}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Strzal()}{Strzal()}}
+{\footnotesize\ttfamily int Strzal (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{atakowany\+Gracz,  }\item[{int}]{pole }\end{DoxyParamCaption})}
+
+Funckja sprawdzająca czy strzał jest możliwy do wykonanania oraz zwracająca informacja o tym jaki był wynik strzału. 
+\begin{DoxyParams}{Parametry}
+{\em atakowany\+Gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, w którego pole zostanie wykonany strzał \\
+\hline
+{\em pole} & Pole, w które należy strzelić. Koordynaty są podane jako liczba dwucyfrowa. Pierwsza cyfra określa pole na osi X, a druga na osi Y \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+0 (S\+T\+\_\+\+B\+L\+AD) Informacja o tym, że strzał nie może sotać wykonany w podane pole 
+
+1 (S\+T\+\_\+\+P\+U\+D\+LO) Informacja o tym, że strzał został wykonany poprawnie w pole na którym nie było statku 
+
+2 (S\+T\+\_\+\+C\+EL) Informacja o tym, że strzał został wykonany poprawnie w pole na którym znajdował się statek 
+
+3 (S\+T\+\_\+\+Z\+A\+T\+OP) Informacja o tym, że strzał został wykonany poprawnie oraz statek, który trafiono został zatopiony 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a9d249d3f82dd348832d04158e42d6698}\label{Funkcje_8h_a9d249d3f82dd348832d04158e42d6698}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Ustaw\+Statek@{Ustaw\+Statek}}
+\index{Ustaw\+Statek@{Ustaw\+Statek}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Ustaw\+Statek()}{UstawStatek()}}
+{\footnotesize\ttfamily int Ustaw\+Statek (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz,  }\item[{int}]{dlugosc,  }\item[{int}]{pole,  }\item[{int}]{kierunek,  }\item[{int}]{rodzaj\+Statku }\end{DoxyParamCaption})}
+
+Funkcja ustawiająca statki na planszy. Sprawdza czy statek może zostać ustawiony, a następnie go ustawia zmieniając wartości znajdujące się na tablicy dwu wymiarowej na identyfikator statku. 
+\begin{DoxyParams}{Parametry}
+{\em gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, który ustawia statek \\
+\hline
+{\em dlugosc} & Długość ustawianego statku \\
+\hline
+{\em pole} & Pole, w którym zaczyna się statek. Jest to liczba dwucyfrowa, której pierwsza cyfra to pole na osi X, a druga to pole na osi Y \\
+\hline
+{\em kierunek} & Informacja, w którym kierunku powinien być ustawiony statek. 1-\/ wertykalnie. 0-\/ horyzontalnie \\
+\hline
+{\em rodzaj\+Statku} & Identyfikator statku. Ta liczba zostanie wpisana na pole podczas ustawiania. Powinna być mniejsza od -\/3 oraz unikalna (wyjątkiem są statki zajmujące jedno pole) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+0, gdy na podanych koordynatach nie można ustwawić statku w danym kierunku 
+
+1, gdy statek został ustawiony poprawnie 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a55cd579e7766f0d10670af83f6851329}\label{Funkcje_8h_a55cd579e7766f0d10670af83f6851329}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Usun\+Liste@{Usun\+Liste}}
+\index{Usun\+Liste@{Usun\+Liste}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Usun\+Liste()}{UsunListe()}}
+{\footnotesize\ttfamily void Usun\+Liste (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$}]{lista }\end{DoxyParamCaption})}
+
+Usuwanie dynamicznie zaalokowanej listy. 
+\begin{DoxyParams}{Parametry}
+{\em lista} & Wskaźnik na listę, której pamięc należy usunąć \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_a59690bbceeb5a354133089ef22a98764}\label{Funkcje_8h_a59690bbceeb5a354133089ef22a98764}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Usun\+Statek@{Usun\+Statek}}
+\index{Usun\+Statek@{Usun\+Statek}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Usun\+Statek()}{UsunStatek()}}
+{\footnotesize\ttfamily int Usun\+Statek (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$}]{historia,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz }\end{DoxyParamCaption})}
+
+Funkcja usuwająca statek z planszy. Używana tylko w trakcie przygotowania do gry na żądanie gracza. Następnie prosi o podanie nowych koordynatów tak jakby poprzedni ruch nie został wykonany .Do poprawnego działania lista historia powinna być poprawnie zainicjowana, a jej najstarszy element powinien być utworzony z typem wyliczeniowym start. 
+\begin{DoxyParams}{Parametry}
+{\em historia} & Wskaźnik na liste ruchów \\
+\hline
+{\em gracz} & \mbox{\hyperlink{structGracz}{Gracz}}, który aktualnie wykonuje ruch \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+1, gdy usunięto i ponownie ustawiono statek 
+
+0, gdy nie ma już ruchów do cofnięcia na liście 
+
+-\/1, gdy lista została źle utworzona (jej pierwszy element nie ma określonego odpowiedniego typu wyliczeniowego) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a38713848d4bb49d9e8148e0e3281d23d}\label{Funkcje_8h_a38713848d4bb49d9e8148e0e3281d23d}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Usun\+Tablice@{Usun\+Tablice}}
+\index{Usun\+Tablice@{Usun\+Tablice}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Usun\+Tablice()}{UsunTablice()}}
+{\footnotesize\ttfamily void Usun\+Tablice (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz1,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz2 }\end{DoxyParamCaption})}
+
+Procedura usuwania dynamicznie zaalokownaych tablic. 
+\begin{DoxyParams}{Parametry}
+{\em gracz1} & \mbox{\hyperlink{structGracz}{Gracz}}, którego tablicę należy wypełnić \\
+\hline
+{\em gracz2} & \mbox{\hyperlink{structGracz}{Gracz}}, którego tablicę należy wypełnić. Powinien być rózny od gracza pierwszego \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_aa63004000aaecdfead8c879014c561c3}\label{Funkcje_8h_aa63004000aaecdfead8c879014c561c3}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Utworz\+Zapis@{Utworz\+Zapis}}
+\index{Utworz\+Zapis@{Utworz\+Zapis}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Utworz\+Zapis()}{UtworzZapis()}}
+{\footnotesize\ttfamily int Utworz\+Zapis (\begin{DoxyParamCaption}\item[{int}]{tryb\+Gry,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}}}]{gracz1,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}}}]{gracz2,  }\item[{mxml\+\_\+node\+\_\+t $\ast$$\ast$}]{xml }\end{DoxyParamCaption})}
+
+Funkcja tworzy zapis na podstawie ustawień i zakończonego, przez obu graczy, przygotowania do gry. Tworzy drzewo xml, które pozwala na łatwe zapisywanie w późniejszej częsci gry. 
+\begin{DoxyParams}{Parametry}
+{\em tryb\+Gry} & Informacja o tym w jakim trybie toczy się rozgrywka \\
+\hline
+{\em gracz1} & Struktura przechowująca dane gracza pierwszego \\
+\hline
+{\em gracz2} & Struktura przechowująca dane gracza drugiego \\
+\hline
+{\em xml} & Wskaźnik pod którym zostanie utworzone drzewo xml \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+1, gdy poprawnie wykonano zapis do pliku 
+
+0, gdy nie można było zapisać do pliku. W tym przypadku drzewo zostało utworzone tylko w pamięci aplikacji 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a66f34b463dc19f1003b7f5c0f076da1d}\label{Funkcje_8h_a66f34b463dc19f1003b7f5c0f076da1d}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Wczytaj@{Wczytaj}}
+\index{Wczytaj@{Wczytaj}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Wczytaj()}{Wczytaj()}}
+{\footnotesize\ttfamily int Wczytaj (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz1,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz2,  }\item[{mxml\+\_\+node\+\_\+t $\ast$$\ast$}]{xml,  }\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$$\ast$}]{ruchy }\end{DoxyParamCaption})}
+
+Funkcja wczytuje dane z pliku z zapisem nadpisując obecne informacje. Nadpisane zostaną dane graczy, drzewo xml oraz lista wykonanych ruchów. 
+\begin{DoxyParams}{Parametry}
+{\em gracz1} & Wskażnik na strukture do której zostaną wpisane dane gracza pierwszego \\
+\hline
+{\em gracz2} & Wskażnik na strukture do której zostaną wpisane dane gracza drugiego \\
+\hline
+{\em xml} & Wskaźnik pod którym zostanie utworzone drzewo xml \\
+\hline
+{\em ruchy} & Wskaźnik na liste ruchów \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+0, gdy nie można było otworzyć pliku lub załadowanie drzewa z tego pliku było niemożliwe 
+
+1, gdy procedura odczytywania przebiegła pomyślnie 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a1a08160abc9e2621b2e81fa92880118f}\label{Funkcje_8h_a1a08160abc9e2621b2e81fa92880118f}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Wprowadz\+Zadanie@{Wprowadz\+Zadanie}}
+\index{Wprowadz\+Zadanie@{Wprowadz\+Zadanie}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Wprowadz\+Zadanie()}{WprowadzZadanie()}}
+{\footnotesize\ttfamily int Wprowadz\+Zadanie (\begin{DoxyParamCaption}\item[{int}]{liczba\+Argumentow }\end{DoxyParamCaption})}
+
+Funkcja do komunikacji z użytkownikiem, pozwalająca na używanie komend w dowolnej chwili. Po wprowadzeniu komendy wypisuje informacje, które działanie próbowano wykonać. 
+\begin{DoxyParams}{Parametry}
+{\em liczba\+Argumentow} & Parametr określający jak dużo danych chcemy otrzymać. Dla 0 wymaga naciśnięcia klawisza \char`\"{}\+Enter\char`\"{}, dla 1 wymaga jednej wartości, dla 2 dwóch wartości. Inne wartości nie są obsługiwane \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+-\/2 (Z\+A\+D\+\_\+\+F\+L\+O\+TA) Zwracana, gdy użyto komendy \char`\"{}flota\char`\"{} 
+
+-\/3 (Z\+A\+D\+\_\+\+C\+O\+F\+N\+IJ) Zwracana, gdy użyto komendy \char`\"{}cofnij\char`\"{} 
+
+-\/4 (Z\+A\+D\+\_\+\+Z\+A\+P\+I\+SZ) Zwracana, gdy użyto komendy \char`\"{}zapisz\char`\"{} 
+
+-\/5 (Z\+A\+D\+\_\+\+W\+C\+Z\+Y\+T\+AJ) Zwracana, gdy użyto komendy \char`\"{}wczytaj\char`\"{} 
+
+0 (Z\+A\+D\+\_\+\+B\+R\+AK) Zwracana, gdy liczba\+Argumentow wynosi 0 i nie podano komedy 
+
+Liczba całkowita, której cyfra jedności ma wartość drugiego argumentu a pozostała część liczby wartość pierwszego. Zwracana tylko gdy nie użyto żadnej komendy 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a812971029754230ff400e251bdecac29}\label{Funkcje_8h_a812971029754230ff400e251bdecac29}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Wyczysc\+Bufor@{Wyczysc\+Bufor}}
+\index{Wyczysc\+Bufor@{Wyczysc\+Bufor}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Wyczysc\+Bufor()}{WyczyscBufor()}}
+{\footnotesize\ttfamily void Wyczysc\+Bufor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Funkcja czyszcząca pozostałości z bufora. \mbox{\Hypertarget{Funkcje_8h_a84aa6a449c0f2d5ca7e6a88d414fe6db}\label{Funkcje_8h_a84aa6a449c0f2d5ca7e6a88d414fe6db}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Wypelnij\+Tablice@{Wypelnij\+Tablice}}
+\index{Wypelnij\+Tablice@{Wypelnij\+Tablice}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Wypelnij\+Tablice()}{WypelnijTablice()}}
+{\footnotesize\ttfamily int Wypelnij\+Tablice (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz1,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{gracz2 }\end{DoxyParamCaption})}
+
+Procedura alokowania i wypełnienia tablic będąch planszami dla graczy. Tablice alokowane są dynamicznie korzystając z rozmiaru określonego w makro R\+O\+Z\+M\+I\+A\+R\+\_\+\+P\+O\+LA. Gdy alokacja pamięci będzie niemożliwa, funkcja zwolni zaalokowaną przez nią pamięć. 
+\begin{DoxyParams}{Parametry}
+{\em gracz1} & \mbox{\hyperlink{structGracz}{Gracz}}, którego tablicę należy wypełnić \\
+\hline
+{\em gracz2} & \mbox{\hyperlink{structGracz}{Gracz}}, którego tablicę należy wypełnić. Powinien być rózny od gracza pierwszego \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+1, gdy alokacja zakończyła się sukcesem 
+
+0, gdy wystąpiły błędy alokacji. Pamięć zaalokowana do błędu zostanie w funkcji zwolniona 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_ac5c95fbf1f4e025d6ca9598e98771bd8}\label{Funkcje_8h_ac5c95fbf1f4e025d6ca9598e98771bd8}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Wypisz\+Flote@{Wypisz\+Flote}}
+\index{Wypisz\+Flote@{Wypisz\+Flote}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Wypisz\+Flote()}{WypiszFlote()}}
+{\footnotesize\ttfamily void Wypisz\+Flote (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}} $\ast$}]{przeciwnik }\end{DoxyParamCaption})}
+
+Funkcja wypisująca statki przeciwnika, które nie zostały zatopione. 
+\begin{DoxyParams}{Parametry}
+{\em przeciwnik} & \mbox{\hyperlink{structGracz}{Gracz}}, którego niezatopione statki należy wypisać \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_ab9eac42cddbb3e9014ca1ff6b4cde999}\label{Funkcje_8h_ab9eac42cddbb3e9014ca1ff6b4cde999}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Wypisz\+Ruchy@{Wypisz\+Ruchy}}
+\index{Wypisz\+Ruchy@{Wypisz\+Ruchy}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Wypisz\+Ruchy()}{WypiszRuchy()}}
+{\footnotesize\ttfamily void Wypisz\+Ruchy (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$}]{ruchy }\end{DoxyParamCaption})}
+
+Funkcja wypisująca ruchy poprzedniego gracza. Nie modyfikuje listy. Wypisuje do pierwszego sppotkanego elementu z typem wyliczeniowym określonym jako \char`\"{}start\char`\"{}. 
+\begin{DoxyParams}{Parametry}
+{\em ruchy} & \mbox{\hyperlink{structLista}{Lista}} wykonanych ruchów. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{Funkcje_8h_af26c9ce290837bb4c8be38e046fd9a7d}\label{Funkcje_8h_af26c9ce290837bb4c8be38e046fd9a7d}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Zapisz@{Zapisz}}
+\index{Zapisz@{Zapisz}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Zapisz()}{Zapisz()}}
+{\footnotesize\ttfamily int Zapisz (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGracz}{Gracz}}}]{gracz1,  }\item[{\mbox{\hyperlink{structGracz}{Gracz}}}]{gracz2,  }\item[{mxml\+\_\+node\+\_\+t $\ast$$\ast$}]{xml,  }\item[{\mbox{\hyperlink{Funkcje_8h_a11b5571e97ef883ab2d5d4ff213f79e1}{Historia}} $\ast$}]{ruchy }\end{DoxyParamCaption})}
+
+Funkcja wykonująca zapis w tracie rozgrywki. Początkowo funkcja aktualizuje drzewo danymi, których ciągły zapis do drzewa byłby nieoptymalny. Dane aktualizowane znajdują sie w strukturach \mbox{\hyperlink{structGracz}{Gracz}}. 
+\begin{DoxyParams}{Parametry}
+{\em gracz1} & Struktura przechowująca dane gracza pierwszego \\
+\hline
+{\em gracz2} & Struktura przechowująca dane gracza drugiego \\
+\hline
+{\em xml} & Wskaznik na drzewo porzechowujące informacje, które należy zapisać do pliku. \\
+\hline
+{\em ruchy} & \mbox{\hyperlink{structLista}{Lista}} ruchów \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Zwraca}
+1, gdy poprawnie wykonano zapis do pliku 
+
+0, gdy nie można było zapisać do pliku. W tym przypadku drzewo zostało utworzone tylko w pamięci aplikacji 
+\end{DoxyReturn}
+\mbox{\Hypertarget{Funkcje_8h_a7f6f898cce85842d7885dd851bf339f7}\label{Funkcje_8h_a7f6f898cce85842d7885dd851bf339f7}} 
+\index{Funkcje.\+h@{Funkcje.\+h}!Zmien\+Kolor@{Zmien\+Kolor}}
+\index{Zmien\+Kolor@{Zmien\+Kolor}!Funkcje.\+h@{Funkcje.\+h}}
+\paragraph{\texorpdfstring{Zmien\+Kolor()}{ZmienKolor()}}
+{\footnotesize\ttfamily void Zmien\+Kolor (\begin{DoxyParamCaption}\item[{int}]{typ }\end{DoxyParamCaption})}
+
+Funkcja zmieniająca kolor tekstu. Ma zastosowanie estetyczne. Dla nieobsługiwanych systemów nie wykona żadnej instrukcji. 
+\begin{DoxyParams}{Parametry}
+{\em typ} & Kod koloru na który zostanie zamieniony kolor tekstu w konsoli \\
+\hline
+\end{DoxyParams}

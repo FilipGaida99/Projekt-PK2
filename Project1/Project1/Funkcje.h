@@ -3,27 +3,6 @@
 /**@file*/
 #include "mxml-3.0/mxml.h"
 
-#define ROZMIAR_POLA 10
-
-#define NO_SYS_NEWLINE 100
-
-
-//Makra zwiêkszaj¹ce czytelnoœæ kodu
-//WPROWAZDZANIE KOMEND
-#define ZAD_FLOTA -2
-#define ZAD_COFNIJ -3
-#define ZAD_ZAPISZ -4
-#define ZAD_WCZYTAJ -5
-#define ZAD_BRAK 0
-//WYNIK BITWY
-#define B_KONIEC 0
-#define B_NIEKONIEC 1
-#define B_WCZYTAJ 2
-//WYNIK STRZA£U
-#define ST_BLAD 0
-#define ST_PUDLO 1
-#define ST_CEL 2
-#define ST_ZATOP 3
 
 #define ZIELONY 10
 #define CZERWONY 12
@@ -48,13 +27,49 @@ typedef struct {
 	int statki;
 }Gracz;
 
+typedef struct {
+	//Ustawienia gry
+	int trybGry;
+	int automat;
+	int wczytaj;
+	//Konfiguracja gry
+	int rozmiarPola_x;
+	int rozmiarPola_y;
+	int trudnosc;
+	int no_system_new_line_number;
+	char* plikZapisu;
+	
+	//kody funkcji
+	int zad_brak;
+	int zad_wczytaj;
+	int zad_zapisz;
+	int zad_cofnij;
+	int zad_flota;
+	int b_koniec;
+	int b_niekoniec;
+	int b_wczytaj;
+	int st_blad;
+	int st_pudlo;
+	int st_cel;
+	int st_zatop;
+}Konfiguracja;
+
+typedef struct _Rozgrywka{
+	Gracz gracz1;
+	Gracz gracz2;
+	mxml_node_t* xml;
+	mxml_node_t* tura_n;
+	mxml_node_t* czyja_n;
+	Historia* ruchy;
+
+}Rozgrywka;
 
 /**struktura obs³uguj¹ca sztuczn¹ inteligencjê. */
 typedef struct {
 	//Indeks informuj¹cy, który z elementów tablicy  wskaŸników na funkcje bêdzie u¿ywany w trakcie decyzji
 	int stanPoprzedni;
 	//Tablica wskaŸników na funkcje steruj¹ce ostrza³em
-	int(*stan[6])(int poprzedniePole);
+	int(*stan[6])(Konfiguracja *konfiguracja,int poprzedniePole);
 	//Koordynaty pola na które ostatnio celowano
 	int aktualnePole;
 }Wybor;
@@ -71,28 +86,39 @@ typedef struct Lista{
 	struct Lista* pPoprzednia;
 }Historia;
 
+
+
+
+int PobierzParametry(int ileArg, char* arg[], Konfiguracja *konfiguracja);
+int Skonfiguruj(Konfiguracja *konfiguracja);
+void UstawParametry(Konfiguracja *konfiguracja);
+int Iniciuj(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka);
+void GameLoop(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka);
+void GameLoopAI(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka);
+
+
 /**Funkcja czyszcz¹ca pozosta³oœci z bufora.*/
 void WyczyscBufor();
 /**Funkcja wyœwietlaj¹ca graczowi planszê jego lub przeciwnika.
 @param gracz Gracz, którego planszê nale¿y wyœwietliæ
 @param dyskrecja Parametr okreœlaj¹cy czy nale¿y wyœwietliæ statki. Dla zmiennej równej 0, statki s¹ wyœwietlane, w przeciwnym wypadku s¹ pomijane.
 */
-void RysujPlansze(Gracz gracz, int dyskrecja);
+void RysujPlansze(Konfiguracja* konfiguracja, Gracz gracz, int dyskrecja);
 /**Funkcja rozpoczyna przygotowanie do gry w przypadku, gdy nie rozpoczêto od wczytania zapisu. Funkcja komunikuje siê z u¿ytkwonikiem przez konsole.
 @param gracz Gracz, którego pole gry bêdzie ustalane na podstawie informacji otrzymywanych od u¿ytkownika
 */
-void Rozmieszczenie(Gracz* gracz);
+void Rozmieszczenie(Konfiguracja* konfiguracja, Gracz* gracz);
 /**Funkcja rozpoczyna przygotowanie do gry losowo umieszczaj¹c wszystkie statki.
 @param gracz Gracz, którego pole gry bêdzie ustalane poprzez losowe rozmieszczenie statków
 */
-void AutoRozmieszczenie(Gracz* gracz);
+void AutoRozmieszczenie(Konfiguracja* konfiguracja, Gracz* gracz);
 /**Procedura alokowania i wype³nienia tablic bêd¹ch planszami dla graczy. Tablice alokowane s¹ dynamicznie korzystaj¹c z rozmiaru okreœlonego w makro ROZMIAR_POLA. Gdy alokacja pamiêci bêdzie niemo¿liwa, funkcja zwolni zaalokowan¹ przez ni¹ pamiêæ.
 @param gracz1 Gracz, którego tablicê nale¿y wype³niæ
 @param gracz2 Gracz, którego tablicê nale¿y wype³niæ. Powinien byæ rózny od gracza pierwszego
 @return 1, gdy alokacja zakoñczy³a siê sukcesem
 @return 0, gdy wyst¹pi³y b³êdy alokacji. Pamiêæ zaalokowana do b³êdu zostanie w funkcji zwolniona
 */
-int WypelnijTablice(Gracz* gracz1, Gracz*gracz2);
+int WypelnijTablice(Konfiguracja* konfiguracja, Gracz* gracz1, Gracz*gracz2);
 
 /**Funkcja ustawiaj¹ca statki na planszy. Sprawdza czy statek mo¿e zostaæ ustawiony, a nastêpnie go ustawia zmieniaj¹c wartoœci znajduj¹ce siê na tablicy dwu wymiarowej na identyfikator statku.
 @param gracz Gracz, który ustawia statek
@@ -103,7 +129,7 @@ int WypelnijTablice(Gracz* gracz1, Gracz*gracz2);
 @return 0, gdy na podanych koordynatach nie mo¿na ustwawiæ statku w danym kierunku
 @return 1, gdy statek zosta³ ustawiony poprawnie
 */
-int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajStatku);
+int UstawStatek(Konfiguracja* konfiguracja, Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajStatku);
 
 /**Funkcja usuwaj¹ca statek z planszy. U¿ywana tylko w trakcie przygotowania do gry na ¿¹danie gracza. Nastêpnie prosi o podanie nowych koordynatów tak jakby poprzedni ruch nie zosta³ wykonany .Do poprawnego dzia³ania lista historia powinna byæ poprawnie zainicjowana, a jej najstarszy element powinien byæ utworzony z typem wyliczeniowym start. 
 @param historia WskaŸnik na liste ruchów
@@ -112,13 +138,13 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajSta
 @return 0, gdy nie ma ju¿ ruchów do cofniêcia na liœcie
 @return -1, gdy lista zosta³a Ÿle utworzona (jej pierwszy element nie ma okreœlonego odpowiedniego typu wyliczeniowego)
 */
-int UsunStatek(Historia** historia, Gracz* gracz);
+int UsunStatek(Konfiguracja* konfiguracja, Historia** historia, Gracz* gracz);
 
 /**Procedura usuwania dynamicznie zaalokownaych tablic.
 @param gracz1 Gracz, którego tablicê nale¿y wype³niæ
 @param gracz2 Gracz, którego tablicê nale¿y wype³niæ. Powinien byæ rózny od gracza pierwszego
 */
-void UsunTablice(Gracz* gracz1, Gracz*gracz2);
+void UsunTablice(Konfiguracja* konfiguracja, Gracz* gracz1, Gracz*gracz2);
 
 
 /**Funckja sprawdzaj¹ca czy strza³ jest mo¿liwy do wykonanania oraz zwracaj¹ca informacja o tym jaki by³ wynik strza³u.
@@ -129,7 +155,7 @@ void UsunTablice(Gracz* gracz1, Gracz*gracz2);
 @return 2 (ST_CEL) Informacja o tym, ¿e strza³ zosta³ wykonany poprawnie w pole na którym znajdowa³ siê statek
 @return 3 (ST_ZATOP) Informacja o tym, ¿e strza³ zosta³ wykonany poprawnie oraz statek, który trafiono zosta³ zatopiony
 */
-int Strzal(Gracz* atakowanyGracz, int pole);
+int Strzal(Konfiguracja* konfiguracja, Gracz* atakowanyGracz, int pole);
 /**Komunikacja z u¿ytkownikiem po zakoñczeniu przygotowañ. Pojedyncze wywo³anie jest pojedyncz¹ tur¹ jednego gracza
 @param gracz1 Gracz, którego tura powinna byæ wykonana
 @param gracz2 Gracz, który bêdzie przeciwnikiem dla gracz1. Powinien byæ rózny od gracza pierwszego
@@ -139,7 +165,7 @@ int Strzal(Gracz* atakowanyGracz, int pole);
 @return 1 (B_NIEKONIEC) Informacja o tym, ¿e ka¿dy gracz ma jeszcze statki
 @return 2 (B_WCZYTAJ) Wartoœæ zwracana w przypadku udanego wcytania gry 
 */
-int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy);
+int Bitwa(Konfiguracja (*konfiguracja), Rozgrywka (*rozgrywka));
 /**Funkcja czyszcz¹ca konsolê. Zabezpieczenie przed podgl¹daniem pól przeciwnika. W przyadku nieobs³ugiwanego systemu operacyjnego funkcja wypisze dostateczn¹ iloœæ nowych linii, aby gracze nie widzieli w swojej turze statków przeciwnika.
 */
 void Oczysc();
@@ -184,32 +210,32 @@ void WypiszRuchy(Historia* ruchy);
 @param poprzedniePole Poprzednie pole w które celowano
 @return Nowe pole, w które nale¿y wycelowaæ
 */
-int Losuj(int poprzedniePole);
+int Losuj(Konfiguracja* konfiguracja, int poprzedniePole);
 /**Funkcja przenosz¹ca celowanie o jedno pole do góry.
 @param poprzedniePole Poprzednie pole w które celowano
 @return Nowe pole, w które nale¿y wycelowaæ
 */
-int IdzN(int poprzedniePole);
+int IdzN(Konfiguracja* konfiguracja, int poprzedniePole);
 /**Funkcja przenosz¹ca celowanie o jedno pole w dó³.
 @param poprzedniePole Poprzednie pole w które celowano
 @return Nowe pole, w które nale¿y wycelowaæ
 */
-int IdzS(int poprzedniePole);
+int IdzS(Konfiguracja* konfiguracja, int poprzedniePole);
 /**Funckja przenosz¹ca celowanie o jedno pole w prawo.
 @param poprzedniePole Poprzednie pole w które celowano
 @return Nowe pole, w które nale¿y wycelowaæ
 */
-int IdzE(int poprzedniePole);
+int IdzE(Konfiguracja* konfiguracja, int poprzedniePole);
 /**Funckja przenosz¹ca celowanie o jedno pole w lewo.
 @param poprzedniePole Poprzednie pole w które celowano
 @return Nowe pole, w które nale¿y wycelowaæ
 */
-int IdzW(int poprzedniePole);
+int IdzW(Konfiguracja* konfiguracja, int poprzedniePole);
 /**Funkcja przenosz¹ca celowanie o jedno pole w prawo i jedno w dó³.
 @param poprzedniePole Poprzednie pole w które celowano
 @return Nowe pole, w które nale¿y wycelowaæ
 */
-int IdzSkos(int poprzedniePole);
+int IdzSkos(Konfiguracja* konfiguracja, int poprzedniePole);
 /**Funkcja obs³uguj¹ca turê dla gry z komputerem. 
 @param atakowanyGracz Gracz, który jest przeciwnikiem komputera
 @param AI Struktura posiadaj¹ca zainicjowan¹ tablice wskaŸników na funckje celuj¹ce oraz indeks nastêpnej funkcji do wykonania
@@ -217,7 +243,7 @@ int IdzSkos(int poprzedniePole);
 @return 0 (B_KONIEC) Informacja o tym, ¿e jeden z graczy straci³ wszystkie statki. Wartoœæ ta koñczy pêtle gry
 @return 1 (B_NIEKONIEC) Informacja o tym, ¿e ka¿dy gracz ma jeszcze statki.
 */
-int BitwaAI(Gracz* atakowanyGracz, Wybor* AI, Historia** ruchy);
+int BitwaAI(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka, Wybor* AI);
 
 /**Funkcja pobiera od u¿ytkownika informacje gdzie powinien zostaæ umieszczony pojedyczy statek.
 @param dlugosc D³ugoœæ statku, który nale¿y umieœciæ
@@ -225,7 +251,7 @@ int BitwaAI(Gracz* atakowanyGracz, Wybor* AI, Historia** ruchy);
 @param historia Lista ruchów gracza. Pozwala na cofanie statków
 @param rodzaj identyfikator statku. Ta wartoœæ zostanie wpisana na pole w momencie ustawiania statku
 */
-void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia, int rodzaj);
+void PobierzKoordynaty(Konfiguracja* konfiguracja, int dlugosc, Gracz* gracz, Historia** historia, int rodzaj);
 
 //Funkcje do obs³ugi zapisów
 
@@ -237,7 +263,7 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia, int rodza
 @return 1, gdy poprawnie wykonano zapis do pliku
 @return 0, gdy nie mo¿na by³o zapisaæ do pliku. W tym przypadku drzewo zosta³o utworzone tylko w pamiêci aplikacji
 */
-int UtworzZapis(int trybGry, Gracz gracz1, Gracz gracz2, mxml_node_t** xml);
+int UtworzZapis(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka);
 /**Funkcja wykonuj¹ca zapis w tracie rozgrywki. Pocz¹tkowo funkcja aktualizuje drzewo danymi, których ci¹g³y zapis do drzewa by³by nieoptymalny. Dane aktualizowane znajduj¹ sie w strukturach Gracz.
 @param gracz1 Struktura przechowuj¹ca dane gracza pierwszego
 @param gracz2 Struktura przechowuj¹ca dane gracza drugiego
@@ -246,7 +272,7 @@ int UtworzZapis(int trybGry, Gracz gracz1, Gracz gracz2, mxml_node_t** xml);
 @return 1, gdy poprawnie wykonano zapis do pliku
 @return 0, gdy nie mo¿na by³o zapisaæ do pliku. W tym przypadku drzewo zosta³o utworzone tylko w pamiêci aplikacji
 */
-int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml, Historia* ruchy);
+int Zapisz(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka);
 /**Funkcja wczytuje dane z pliku z zapisem nadpisuj¹c obecne informacje. Nadpisane zostan¹ dane graczy, drzewo xml oraz lista wykonanych ruchów.
 @param gracz1 Wska¿nik na strukture do której zostan¹ wpisane dane gracza pierwszego
 @param gracz2 Wska¿nik na strukture do której zostan¹ wpisane dane gracza drugiego
@@ -255,7 +281,7 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml, Historia* ruchy);
 @return 0, gdy nie mo¿na by³o otworzyæ pliku lub za³adowanie drzewa z tego pliku by³o niemo¿liwe
 @return 1, gdy procedura odczytywania przebieg³a pomyœlnie
 */
-int Wczytaj(Gracz* gracz1, Gracz* gracz2, mxml_node_t**xml, Historia** ruchy);
+int Wczytaj(Konfiguracja* konfiguracja, Rozgrywka *rozgrywka);
 
 #endif // !FUNKCJE_H
 

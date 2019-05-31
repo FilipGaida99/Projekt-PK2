@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Funkcje.h"
-
+#include <time.h>
 
 #if _WIN32
 #include <Windows.h>
@@ -10,7 +10,246 @@
 #include "mxml-3.0/mxml.h"
 
 
-int UtworzZapis(int trybGry, Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
+
+int PobierzParametry(int ileArg, char* arg[], Konfiguracja *konfiguracja) {
+	
+	konfiguracja->trybGry = -1;
+	konfiguracja->automat = 0;
+	konfiguracja->wczytaj = 0;
+	if (ileArg > 1) {
+		if (!strcmp(arg[1], "-l")) {
+			konfiguracja->wczytaj = 1;
+			if (ileArg > 2) {
+				konfiguracja->plikZapisu = strdup(arg[2]);
+			}
+			else{
+				konfiguracja->plikZapisu = strdup("Zapis.xml");
+			}
+		}
+		else if (!strcmp(arg[1], "-h")) {
+			konfiguracja->trybGry = 1;
+		}
+		else if (!strcmp(arg[1], "-c")) {
+			if (ileArg > 2 && !strcmp(arg[2], "-a")) {
+				konfiguracja->automat = 1;
+			}
+			konfiguracja->trybGry = 0;
+
+		}
+	}
+	if (konfiguracja->wczytaj == 0 && (konfiguracja->trybGry != 1 && konfiguracja->trybGry != 0)) {
+		return 0;
+	}
+
+	return 1;
+}
+
+int Skonfiguruj(Konfiguracja *konfiguracja) {
+	FILE* plikKonfiguracji = fopen("config.ini","r");
+	if (plikKonfiguracji == NULL) {
+		printf("Brak pliku konfiguracji");
+		return 0;
+	}
+	char buffor[30];
+	fscanf(plikKonfiguracji, "%s %d", &buffor, &konfiguracja->rozmiarPola_x);
+	fscanf(plikKonfiguracji, "%s %d", &buffor, &konfiguracja->rozmiarPola_y);
+	fscanf(plikKonfiguracji, "%s %d", &buffor, &konfiguracja->no_system_new_line_number);
+	fscanf(plikKonfiguracji, "%s %d", &buffor, &konfiguracja->trudnosc);
+	if (konfiguracja->rozmiarPola_x < 5 || konfiguracja->rozmiarPola_x>10 || konfiguracja->rozmiarPola_y < 5 || konfiguracja->rozmiarPola_y>10) {
+		printf("PLIK KONIFIGURACJI: Podano rozmiar poza zakresem. Dozwolony zakres to miêdzy 5, a 10");
+		return 0;
+	}
+	return 1;
+}
+
+int PobierzKodowanie(Konfiguracja *konfiguracja) {
+	FILE* plikKodowania = fopen("Kod.txt", "r");
+	if (plikKodowania == NULL) {
+		printf("Brak pliku kodowania");
+		return 0;
+	}
+	char buffor[30];
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->zad_flota);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->zad_cofnij);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->zad_zapisz);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->zad_wczytaj);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->zad_brak);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->b_koniec);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->b_niekoniec);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->b_wczytaj);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->st_blad);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->st_pudlo);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->st_cel);
+	fscanf(plikKodowania, "%s %d", &buffor, &konfiguracja->st_zatop);
+	return 1;
+}
+
+
+void UstawParametry(Konfiguracja *konfiguracja) {
+		printf("Witaj w grze w statki. Nacisnij dowolny klawisz aby rozpoczac. Uzyj komendy \"wczytaj\", jesli chcesz wczytac ostatnia gre.\n");
+		int komenda;
+		do {
+			komenda = WprowadzZadanie(0);
+			if (komenda == konfiguracja->zad_flota || komenda == konfiguracja->zad_zapisz || komenda == konfiguracja->zad_cofnij) {
+				printf("Nie mozna teraz wykonac tej akcji.\n");
+			}
+			else if (komenda == konfiguracja->zad_wczytaj) {
+				konfiguracja->wczytaj = 1;
+				break;
+			}
+		} while (komenda != konfiguracja->zad_brak);
+		if (konfiguracja->wczytaj == 0) {
+			printf("Wybierz tryb gry. 0-gra z komputerem (wprowadz \"-1\" by umiescic statki automatycznie) lub 1-gra w dwie osoby(hotseat):");
+			do {
+
+				scanf("%d", &konfiguracja->trybGry);
+				switch (konfiguracja->trybGry)
+				{
+				case -1:
+					konfiguracja->automat = 1;
+					konfiguracja->trybGry = 0;
+				case 0: printf("Wybrano gre z komputerem.\n");
+					break;
+				case 1: printf("Wybrano gre hotseat.\n");
+					break;
+				default: printf("Wybierz miedzy 0 i 1!");
+					break;
+				}
+			} while (konfiguracja->trybGry != 0 && konfiguracja->trybGry != 1);
+		}
+	
+}
+
+int Iniciuj(Konfiguracja*konfiguracja, Rozgrywka* rozgrywka) {
+	rozgrywka->xml = 0;
+	rozgrywka->ruchy = 0;
+	if (WypelnijTablice(konfiguracja,&rozgrywka->gracz1, &rozgrywka->gracz2) == 0) {
+		printf("Bledna alokacja pamieci. Sprobuj uruchomic ponownie.");
+		return 0;
+	}
+	if (konfiguracja->wczytaj == 1) {//rozpoczêcie od wczytywania
+
+		if (Wczytaj(konfiguracja,rozgrywka) == 0) {
+
+			printf("Nie znaleziono zapisu lub plik z zapisem jest uszkodzony. \nSprobuj uruchomic gre ponownie lub zaczac od poczatku");
+			UsunTablice(konfiguracja,&rozgrywka->gracz1, &rozgrywka->gracz2);
+			return 0;
+		}
+		konfiguracja->trybGry = mxmlGetInteger(mxmlFindPath(rozgrywka->xml, "Informacje/Ustawienia/Tryb_Gry"));
+	}
+	else {//przygotowanie do gry
+		Oczysc();
+		if (konfiguracja->automat == 0) {
+			Rozmieszczenie(konfiguracja,&rozgrywka->gracz1);
+		}
+		else { //automat == 1-automatyczne rozmieszczenie.
+			AutoRozmieszczenie(konfiguracja, &rozgrywka->gracz1);
+		}
+		if (konfiguracja->trybGry == 1) {
+			Oczysc();
+			printf("Tura gracza drugiego. Nacisnij dowolny klawisz");
+			getchar();
+			Oczysc();
+			Rozmieszczenie(konfiguracja, &rozgrywka->gracz2);
+		}
+		else {
+			AutoRozmieszczenie(konfiguracja, &rozgrywka->gracz2);
+		}
+
+		UtworzZapis(konfiguracja, rozgrywka);
+	}
+	
+}
+
+void ZamianaGraczy(Rozgrywka* rozgrywka) {
+	Gracz tymczasowa = rozgrywka->gracz1;
+	rozgrywka->gracz1 = rozgrywka->gracz2;
+	rozgrywka->gracz2 = tymczasowa;
+}
+
+void GameLoop(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka) {
+	int tura = 1, wynik1, wynik2;
+	int trigger = mxmlGetInteger(rozgrywka->czyja_n);//zmienna steruj¹ca, pozwala pomin¹æ turê gracza pierwszego, je¿eli dane z pliku tego wymagaj¹.
+	do {
+		if (trigger != 2) {
+			tura = mxmlGetInteger(rozgrywka->tura_n);
+			Oczysc();
+			mxmlSetInteger(rozgrywka->czyja_n, 1);
+			printf("Tura gracza pierwszego. Nacisnij dowolny klawisz.\n");
+			WyczyscBufor();
+			printf("Tura: %d \n", tura);
+			wynik1 = Bitwa(konfiguracja,rozgrywka);
+			if (wynik1 == konfiguracja->b_wczytaj) {
+				if (mxmlGetInteger(rozgrywka->czyja_n) == 1) {
+					wynik2 = 1;//instieje mo¿liwoœæ, ¿e zmienna zostanie u¿yta bez iniciacji dlatego odrazu iniciuje j¹ nie zmieniaj¹c¹ dzia³ania wartosci¹.
+					continue;
+				}
+				tura = mxmlGetInteger(rozgrywka->tura_n);
+				//w przypadku gdy powinna byæ tura gracza 2 nic nie zmienia kolejnoœci po wczytaniu, zmienia siê tylko licznik tur.
+			}
+		}
+		ZamianaGraczy(konfiguracja);
+
+		trigger = 1;
+
+		Oczysc();
+		mxmlSetInteger(rozgrywka->czyja_n, 2);
+		printf("Tura gracza drugiego. Nacisnij dowolny klawisz.\n");
+		WyczyscBufor();
+		printf("Tura: %d \n", tura);
+		wynik2 = Bitwa(konfiguracja,rozgrywka);
+		if (wynik2 == konfiguracja->b_wczytaj) {
+			if (mxmlGetInteger(rozgrywka->czyja_n) == 2) {
+				wynik1 = 1;
+				trigger = 2;
+			}
+		}
+		ZamianaGraczy(konfiguracja);
+		mxmlSetInteger(rozgrywka->tura_n, ++tura);
+
+	} while (wynik1 && wynik2);
+}
+
+void GameLoopAI(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka) {
+	//inicializacja sztucznej inteligencji
+	Wybor AI;
+	InicializujAI(&AI, konfiguracja);
+	int tura = 1, wynik1, wynik2;
+	do {
+		tura = mxmlGetInteger(rozgrywka->tura_n);
+		printf("Tura: %d \n", tura);
+		wynik1 = Bitwa(konfiguracja,rozgrywka);
+		if (wynik1 == konfiguracja->b_wczytaj) {//powstrzymanie komputera przed wykonaniem ruchu.
+			wynik2 = 1;
+			continue;
+		}
+		DodajdoListy(&rozgrywka->ruchy, start, 0, 0);
+		wynik2 = BitwaAI(konfiguracja,rozgrywka, &AI);
+		mxmlSetInteger(rozgrywka->tura_n, ++tura);
+	} while (wynik1 && wynik2);
+}
+
+void InicializujAI(Wybor* AI, Konfiguracja* konfiguracja) {
+	srand(time(NULL));
+	AI->aktualnePole = 0;
+	AI->stanPoprzedni = 0;
+	if (konfiguracja->trudnosc == 0) {// obs³uga typu ³atwego
+		int i;
+		for (i = 0; i < 6; i++) {
+			AI->stan[i] = Losuj;
+		}
+		return;
+	}
+	AI->stan[0] = Losuj;
+	AI->stan[1] = IdzS;
+	AI->stan[2] = IdzN;
+	AI->stan[3] = IdzSkos;
+	AI->stan[4] = IdzW;
+	AI->stan[5] = IdzE;
+}
+
+
+int UtworzZapis(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka) {
 	mxml_node_t *xml;
 	mxml_node_t *informacje;
 	mxml_node_t *dane;
@@ -20,43 +259,45 @@ int UtworzZapis(int trybGry, Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	informacje = mxmlNewElement(xml, "Informacje");
 		dane = mxmlNewElement(informacje, "Ustawienia");
 			wartosc = mxmlNewElement(dane, "Tryb_Gry");
-			mxmlNewInteger(wartosc, trybGry);
+			mxmlNewInteger(wartosc, konfiguracja->trybGry);
 			wartosc = mxmlNewElement(dane, "Tura");
 			mxmlNewInteger(wartosc, 1);
 			wartosc = mxmlNewElement(dane, "Czyja_Tura");
 			mxmlNewInteger(wartosc, 1);
 		dane = mxmlNewElement(informacje, "Gracz1");
 			wartosc= mxmlNewElement(dane, "Statki");
-			mxmlNewInteger(wartosc, gracz1.statki);
+			mxmlNewInteger(wartosc, rozgrywka->gracz1.statki);
 			wartosc = mxmlNewElement(dane, "Pole");
 			int i,j;
-			for (i = 0; i < ROZMIAR_POLA; i++) {
-				for (j = 0; j < ROZMIAR_POLA; j++) {
+			for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+				for (j = 0; j < konfiguracja->rozmiarPola_y; j++) {
 					element = mxmlNewElement(wartosc, "Wartosc");
-					mxmlNewInteger(element, gracz1.pole[i][j]);
+					mxmlNewInteger(element, rozgrywka->gracz1.pole[i][j]);
 				}
 			}
 		dane = mxmlNewElement(informacje, "Gracz2");
 			wartosc = mxmlNewElement(dane, "Statki");
-			mxmlNewInteger(wartosc, gracz2.statki);
+			mxmlNewInteger(wartosc, rozgrywka->gracz2.statki);
 			wartosc = mxmlNewElement(dane, "Pole");
 			
-			for (i = 0; i < ROZMIAR_POLA; i++) {
-				for (j = 0; j < ROZMIAR_POLA; j++) {
+			for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+				for (j = 0; j < konfiguracja->rozmiarPola_x; j++) {
 					element = mxmlNewElement(wartosc, "Wartosc");
-					mxmlNewInteger(element, gracz2.pole[i][j]);
+					mxmlNewInteger(element, rozgrywka->gracz2.pole[i][j]);
 				}
 			}
 		dane = mxmlNewElement(informacje, "Ruchy");
 			wartosc = mxmlNewElement(dane, "Element");
 			mxmlNewInteger(wartosc, -1);
-		if (*drzewo) {
-			mxmlDelete(*drzewo);
+		if (rozgrywka->xml) {
+			mxmlDelete(rozgrywka->xml);
 		}
-	*drzewo = xml;
+	rozgrywka->xml = xml;
+	rozgrywka->tura_n = mxmlFindPath(rozgrywka->xml, "Informacje/Ustawienia/Tura");
+	rozgrywka->czyja_n = mxmlFindPath(rozgrywka->xml, "Informacje/Ustawienia/Czyja_Tura");
 	FILE *fp;
 
-	fp = fopen("Zapis.xml", "w");
+	fp = fopen(konfiguracja->plikZapisu, "w");
 	if (fp) {
 		mxmlSaveFile(xml, fp, MXML_NO_CALLBACK);
 		fclose(fp);
@@ -65,49 +306,46 @@ int UtworzZapis(int trybGry, Gracz gracz1, Gracz gracz2, mxml_node_t** drzewo) {
 	return 0;
 }
 
-int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml, Historia* ruchy) {
+int Zapisz(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka) {
+	
 	mxml_node_t* informacje;
 	mxml_node_t *dane;
 	mxml_node_t *wartosc;
 	int czyja;
-	informacje = mxmlGetFirstChild(*xml);
+	informacje = mxmlGetFirstChild(rozgrywka->xml);
 	dane = mxmlFindPath(informacje, "Ustawienia/Czyja_Tura");
 	czyja = mxmlGetInteger(dane);
 	if (czyja == 2) { //zamaiana kolejnosci graczy, aby zachowaæ sposób kodowania informacji
-		Gracz tymczasowa = gracz1;
-		gracz1 = gracz2;
-		gracz2 = tymczasowa;
+		ZamianaGraczy(rozgrywka);
 	}
 	dane = mxmlFindPath(informacje, "Gracz1");
 	wartosc = mxmlGetFirstChild(dane);
-	mxmlSetInteger(wartosc, gracz1.statki);
+	mxmlSetInteger(wartosc, rozgrywka->gracz1.statki);
 	dane = mxmlFindPath(dane, "Pole");
 	wartosc = mxmlGetFirstChild(dane);
 	int i,j;
-	for (i = 0; i < ROZMIAR_POLA; i++) {
-		for (j = 0; j < ROZMIAR_POLA; j++) {
-			int wynik = gracz1.pole[i][j];
-			mxmlSetInteger(wartosc, gracz1.pole[i][j]);
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+		for (j = 0; j < konfiguracja->rozmiarPola_y; j++) {
+			mxmlSetInteger(wartosc, rozgrywka->gracz1.pole[i][j]);
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
 
-
 	dane = mxmlFindPath(informacje, "Gracz2");
 	wartosc = mxmlGetFirstChild(dane);
-	mxmlSetInteger(wartosc, gracz2.statki);
+	mxmlSetInteger(wartosc, rozgrywka->gracz2.statki);
 	dane = mxmlFindPath(dane, "Pole");
 	wartosc = mxmlGetFirstChild(dane);
-	for (i = 0; i < ROZMIAR_POLA; i++) {
-		for (j = 0; j < ROZMIAR_POLA; j++) {
-			int wynik = gracz2.pole[i][j];
-			mxmlSetInteger(wartosc, gracz2.pole[i][j]);
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+		for (j = 0; j < konfiguracja->rozmiarPola_y; j++) {
+			mxmlSetInteger(wartosc, rozgrywka->gracz2.pole[i][j]);
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
 	dane = mxmlFindPath(informacje, "Ruchy");
 	mxmlDelete(dane);
 	dane = mxmlNewElement(informacje, "Ruchy");
+	Historia* ruchy= rozgrywka->ruchy;
 	while (ruchy != 0 && ruchy->zadanie!=start) {
 		wartosc = mxmlNewElement(dane, "Element");
 		mxmlNewInteger(wartosc, ruchy->argument * 10 + ruchy->rodzaj);
@@ -115,9 +353,9 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml, Historia* ruchy) {
 	}
 	FILE *fp;
 
-	fp = fopen("Zapis.xml", "w");
+	fp = fopen(konfiguracja->plikZapisu, "w");
 	if (fp) {
-		mxmlSaveFile(*xml, fp, MXML_NO_CALLBACK);
+		mxmlSaveFile(rozgrywka->xml, fp, MXML_NO_CALLBACK);
 		fclose(fp);
 		return 1;
 	}
@@ -125,14 +363,14 @@ int Zapisz(Gracz gracz1, Gracz gracz2, mxml_node_t**xml, Historia* ruchy) {
 
 }
 
-int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
+int Wczytaj(Konfiguracja* konfiguracja, Rozgrywka *rozgrywka) {
 	FILE *plik;
 	mxml_node_t *drzewo;
 	mxml_node_t *informacje;
 	mxml_node_t *dane;
 	mxml_node_t *wartosc;
 
-	plik = fopen("Zapis.xml", "r");
+	plik = fopen(konfiguracja->plikZapisu, "r");
 	if (plik == 0) {
 		return 0;
 	}
@@ -140,40 +378,40 @@ int Wczytaj(Gracz* gracz1,Gracz* gracz2, mxml_node_t**xml, Historia** ruchy) {
 	if (drzewo == 0) {
 		return 0;
 	}
-	if (*xml != 0) {
-		mxmlDelete(*xml);
+	if (rozgrywka->xml != 0) {
+		mxmlDelete(rozgrywka->xml);
 	}
-	*xml = drzewo;
+	rozgrywka->xml = drzewo;
 	//Odczytwyanie danych graczy
 	informacje = mxmlGetFirstChild(drzewo);
 	dane = mxmlFindPath(informacje, "Gracz1/Statki");
-	gracz1->statki = mxmlGetInteger(dane);
+	rozgrywka->gracz1.statki = mxmlGetInteger(dane);
 	dane = mxmlFindPath(informacje, "Gracz1/Pole");
 	wartosc = mxmlGetFirstChild(dane);
 	int i, j;
-	for (i = 0; i < ROZMIAR_POLA; i++) {
-		for (j = 0; j < ROZMIAR_POLA; j++) {
-			gracz1->pole[i][j] = mxmlGetInteger(wartosc);
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+		for (j = 0; j < konfiguracja->rozmiarPola_y; j++) {
+			rozgrywka->gracz1.pole[i][j] = mxmlGetInteger(wartosc);
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
 	dane = mxmlFindPath(informacje, "Gracz2/Statki");
-	gracz2->statki = mxmlGetInteger(dane);
+	rozgrywka->gracz2.statki = mxmlGetInteger(dane);
 	dane = mxmlFindPath(informacje, "Gracz2/Pole");
 	wartosc = mxmlGetFirstChild(dane);
-	for (i = 0; i < ROZMIAR_POLA; i++) {
-		for (j = 0; j < ROZMIAR_POLA; j++) {
-			gracz2->pole[i][j] = mxmlGetInteger(wartosc);
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+		for (j = 0; j < konfiguracja->rozmiarPola_y; j++) {
+			rozgrywka->gracz2.pole[i][j] = mxmlGetInteger(wartosc);
 			wartosc = mxmlWalkNext(wartosc, dane, MXML_NO_DESCEND);
 		}
 	}
 	//Wczytywanie listy ruchów
 	dane = mxmlFindPath(informacje, "Ruchy");
-	DodajdoListy(ruchy, start, 0, 0);
+	DodajdoListy(&rozgrywka->ruchy, start, 0, 0);
 	wartosc = mxmlGetLastChild(dane);
 	while (wartosc != 0) {
 		int dane = mxmlGetInteger(wartosc);
-		DodajdoListy(ruchy, strzal, dane / 10, dane % 10);
+		DodajdoListy(&rozgrywka->ruchy, strzal, dane / 10, dane % 10);
 		wartosc = mxmlGetPrevSibling(wartosc);
 	}
 	return 1;
@@ -291,12 +529,12 @@ void Oczysc() {
 #endif
 }
 
-void RysujPlansze(Gracz player, int dyskrecja) {
+void RysujPlansze(Konfiguracja* konfiguracja, Gracz player, int dyskrecja) {
 	int i, j, c=0;
 	
-	for (i = 0; i < ROZMIAR_POLA; i++) {
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
 		printf("|");
-		for (j = 0; j < ROZMIAR_POLA; j++) {
+		for (j = 0; j < konfiguracja->rozmiarPola_y; j++) {
 			if (player.pole[i][j] == -1) {
 				ZmienKolor(CZERWONY);
 				printf("%3c", 'X');
@@ -325,25 +563,25 @@ void RysujPlansze(Gracz player, int dyskrecja) {
 	
 }
 
-int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajStatku) {
+int UstawStatek(Konfiguracja* konfiguracja, Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajStatku) {
 	int x = pole / 10;
 	int y = pole % 10;
 	int i;
-	if (x<0 || x>=ROZMIAR_POLA || y<0 || y>=ROZMIAR_POLA)
+	if (x<0 || x>= konfiguracja->rozmiarPola_x || y<0 || y>= konfiguracja->rozmiarPola_y)
 		return 0;
 	if (kierunek) {
-		if (x + dlugosc > ROZMIAR_POLA)
+		if (x + dlugosc > konfiguracja->rozmiarPola_x)
 			return 0;
 		x -= 1;
 		for (i = 0; i <= dlugosc +1 ; i++) {
-			if (x>=0 && x<ROZMIAR_POLA) {
+			if (x>=0 && x< konfiguracja->rozmiarPola_x) {
 				if (gracz->pole[x][y] < 0) {
 					return 0;
 				}
 				if (y - 1 >= 0 && gracz->pole[x][y - 1] < 0) {
 					return 0;
 				}
-				if (y + 1 < ROZMIAR_POLA && gracz->pole[x][y + 1] < 0) {
+				if (y + 1 < konfiguracja->rozmiarPola_y && gracz->pole[x][y + 1] < 0) {
 					return 0;
 				}
 			}
@@ -357,18 +595,18 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajSta
 
 	}
 	else {
-		if (y + dlugosc > ROZMIAR_POLA)
+		if (y + dlugosc > konfiguracja->rozmiarPola_y)
 			return 0;
 		y -= 1;
 		for (i = 0; i <= dlugosc +1; i++) {
-			if (y >= 0 && y < ROZMIAR_POLA) {
+			if (y >= 0 && y < konfiguracja->rozmiarPola_y) {
 				if (gracz->pole[x][y] < 0) {
 					return 0;
 				}
 				if (x - 1 >= 0 && gracz->pole[x - 1][y] < 0) {
 					return 0;
 				}
-				if (x + 1 < ROZMIAR_POLA && gracz->pole[x + 1][y] < 0) {
+				if (x + 1 < konfiguracja->rozmiarPola_x && gracz->pole[x + 1][y] < 0) {
 					return 0;
 				}
 			}
@@ -382,7 +620,7 @@ int UstawStatek(Gracz* gracz, int dlugosc, int pole, int kierunek, int rodzajSta
 	}
 }
 
-int UsunStatek(Historia** historia, Gracz* gracz) {
+int UsunStatek(Konfiguracja* konfiguracja ,Historia** historia, Gracz* gracz) {
 	Historia* temp = *historia;
 	if (temp->zadanie == ustaw){
 		
@@ -405,9 +643,9 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 			}
 		}
 		
-		RysujPlansze(*gracz, 0);
+		RysujPlansze(konfiguracja,*gracz, 0);
 
-		PobierzKoordynaty(dlugosc, gracz, &(temp->pPoprzednia), temp->rodzaj);
+		PobierzKoordynaty(konfiguracja, dlugosc, gracz, &(temp->pPoprzednia), temp->rodzaj);
 		return 1;
 	}
 	if (temp->zadanie == start) {
@@ -418,7 +656,7 @@ int UsunStatek(Historia** historia, Gracz* gracz) {
 }
 
 
-void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj) {
+void PobierzKoordynaty(Konfiguracja* konfiguracja,int dlugosc, Gracz* gracz, Historia** historia,int rodzaj) {
 	switch (dlugosc)
 	{
 	case 4: printf("Ustaw czteromasztowiec:");
@@ -442,7 +680,7 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj
 			dane = WprowadzZadanie(2);
 		}
 		if (dane == -3) {
-			UsunStatek(historia, gracz);
+			UsunStatek(konfiguracja, historia, gracz);
 			switch (dlugosc)
 			{
 			case 4: printf("Ustaw czteromasztowiec:");
@@ -465,14 +703,14 @@ void PobierzKoordynaty(int dlugosc, Gracz* gracz, Historia** historia,int rodzaj
 			printf("Kordynaty podany w blednym formacie. Odpowiedni format to <numer_pola> <kierunek>");
 			dane = WprowadzZadanie(2);
 		}
-		wynik = UstawStatek(gracz, dlugosc, dane / 100, dane % 100, rodzaj);
+		wynik = UstawStatek(konfiguracja, gracz, dlugosc, dane / 100, dane % 100, rodzaj);
 		if (wynik == 0) {
 			printf("Nie mozna tu ustawic statku. Podaj ponownie: ");
 		}
 	} while (wynik == 0 /*&& printf("Nie mozna tu ustawic statku. Podaj ponownie: ")*/);
 	DodajdoListy(historia, ustaw, dlugosc * 10000 + dane, rodzaj);
 	printf("\n");
-	RysujPlansze(*gracz, 0);
+	RysujPlansze(konfiguracja,*gracz, 0);
 
 }
 
@@ -522,25 +760,25 @@ int WprowadzZadanie(int liczbaArgumentow) {
 }
 
 
-void Rozmieszczenie(Gracz* gracz) {
+void Rozmieszczenie(Konfiguracja* konfiguracja, Gracz* gracz) {
 	Historia* historia = 0;
 	DodajdoListy(&historia, start, 0, 0);
 	gracz->statki = 04332224;
 	printf("Twoje Pole: \n");
-	RysujPlansze(*gracz, 0);
+	RysujPlansze(konfiguracja, *gracz, 0);
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
 
 
-	PobierzKoordynaty(4, gracz, &historia, -9);
-	PobierzKoordynaty(3, gracz, &historia, -8);
-	PobierzKoordynaty(3, gracz, &historia, -7);
-	PobierzKoordynaty(2, gracz, &historia, -6);
-	PobierzKoordynaty(2, gracz, &historia, -5);
-	PobierzKoordynaty(2, gracz, &historia, -4);
-	PobierzKoordynaty(1, gracz, &historia, -3);
-	PobierzKoordynaty(1, gracz, &historia, -3);
-	PobierzKoordynaty(1, gracz, &historia, -3);
-	PobierzKoordynaty(1, gracz, &historia, -3);
+	PobierzKoordynaty(konfiguracja, 4, gracz, &historia, -9);
+	PobierzKoordynaty(konfiguracja, 3, gracz, &historia, -8);
+	PobierzKoordynaty(konfiguracja, 3, gracz, &historia, -7);
+	PobierzKoordynaty(konfiguracja, 2, gracz, &historia, -6);
+	PobierzKoordynaty(konfiguracja, 2, gracz, &historia, -5);
+	PobierzKoordynaty(konfiguracja, 2, gracz, &historia, -4);
+	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
+	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
+	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
+	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
 
 
 	int komenda;
@@ -548,28 +786,28 @@ void Rozmieszczenie(Gracz* gracz) {
 		printf("Oto twoje ustawienie. Czy chcesz je zmienic? Nie bedzie mozna tego zrobic pozniej!\nJezeli chcesz cofnac wprowadz komende \"cofnij\"\nJezeli nie, wprowadz dowolny znak");
 
 		komenda = WprowadzZadanie(0);
-		if (komenda == ZAD_FLOTA || komenda == ZAD_ZAPISZ || komenda == ZAD_WCZYTAJ) {
+		if (komenda == konfiguracja->zad_flota || komenda == konfiguracja->zad_zapisz || komenda == konfiguracja->zad_wczytaj) {
 			printf("Nie mozna teraz wykonac tej akcji.\n");
 		}
-		else if (komenda == ZAD_COFNIJ) {
-			UsunStatek(&historia, gracz);
-			RysujPlansze(*gracz, 0);
+		else if (komenda == konfiguracja->zad_cofnij) {
+			UsunStatek(konfiguracja, &historia, gracz);
+			RysujPlansze(konfiguracja,*gracz, 0);
 		}
-	} while (komenda != ZAD_BRAK);
+	} while (komenda != konfiguracja->zad_brak);
 	UsunListe(&historia);
 }
-void AutoRozmieszczenie(Gracz* gracz) {
+void AutoRozmieszczenie(Konfiguracja* konfiguracja, Gracz* gracz) {
 	gracz->statki = 04332224;
-	while (!UstawStatek(gracz, 4, rand() % 100, rand() % 2, -9));
-	while (!UstawStatek(gracz, 3, rand() % 100, rand() % 2, -8));
-	while (!UstawStatek(gracz, 3, rand() % 100, rand() % 2, -7));
-	while (!UstawStatek(gracz, 2, rand() % 100, rand() % 2, -6));
-	while (!UstawStatek(gracz, 2, rand() % 100, rand() % 2, -5));
-	while (!UstawStatek(gracz, 2, rand() % 100, rand() % 2, -4));
-	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
-	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
-	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
-	while (!UstawStatek(gracz, 1, rand() % 100, rand() % 2, -3));
+	while (!UstawStatek(konfiguracja, gracz, 4, rand() % 100, rand() % 2, -9));
+	while (!UstawStatek(konfiguracja, gracz, 3, rand() % 100, rand() % 2, -8));
+	while (!UstawStatek(konfiguracja, gracz, 3, rand() % 100, rand() % 2, -7));
+	while (!UstawStatek(konfiguracja, gracz, 2, rand() % 100, rand() % 2, -6));
+	while (!UstawStatek(konfiguracja, gracz, 2, rand() % 100, rand() % 2, -5));
+	while (!UstawStatek(konfiguracja, gracz, 2, rand() % 100, rand() % 2, -4));
+	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
+	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
+	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
+	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
 
 	Oczysc();
 }
@@ -577,24 +815,24 @@ void AutoRozmieszczenie(Gracz* gracz) {
 
 
 
-int WypelnijTablice(Gracz* gracz1, Gracz*gracz2) {
-	if((gracz1->pole = malloc(ROZMIAR_POLA * sizeof(int*)))==NULL) return 0;
-	if ((gracz2->pole = malloc(ROZMIAR_POLA * sizeof(int*))) == NULL) {
+int WypelnijTablice(Konfiguracja* konfiguracja, Gracz* gracz1, Gracz*gracz2) {
+	if((gracz1->pole = malloc(konfiguracja->rozmiarPola_x * sizeof(int*)))==NULL) return 0;
+	if ((gracz2->pole = malloc(konfiguracja->rozmiarPola_x * sizeof(int*))) == NULL) {
 		free(gracz1->pole);
 		return 0;
 	}
 	
-	int i, j, c = 0;
-	for (i = 0; i < ROZMIAR_POLA; i++) {
-		if ((gracz1->pole[i] = malloc(ROZMIAR_POLA * sizeof(int))) == NULL) {
+	int i, j;
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+		if ((gracz1->pole[i] = malloc(konfiguracja->rozmiarPola_y * sizeof(int))) == NULL) {
 			break;
 		}
-		if ((gracz2->pole[i] = malloc(ROZMIAR_POLA * sizeof(int))) == NULL) {
+		if ((gracz2->pole[i] = malloc(konfiguracja->rozmiarPola_y * sizeof(int))) == NULL) {
 			free(gracz1->pole[i]);
 			break;
 		}
 	}
-	if (i < ROZMIAR_POLA) { 
+	if (i < konfiguracja->rozmiarPola_x) {
 		//wyst¹pi³y b³êdy alokacji nale¿y usun¹æ dotychczas zaalokowan¹ pamiêæ
 		for (i--; i >= 0; i--) {
 			free(gracz1->pole[i]);
@@ -604,18 +842,18 @@ int WypelnijTablice(Gracz* gracz1, Gracz*gracz2) {
 		free(gracz2->pole);
 		return 0;
 	}
-	for (i = 0; i < ROZMIAR_POLA; i++) {
-		for (j = 0; j < ROZMIAR_POLA; j++) {
-			gracz1->pole[i][j] = gracz2->pole[i][j] = c++;
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
+		for (j = 0; j < konfiguracja->rozmiarPola_y; j++) {
+			gracz1->pole[i][j] = gracz2->pole[i][j] = 10*i+j;
 		}
 
 	}
 	return 1;
 }
 
-void UsunTablice(Gracz* gracz1, Gracz*gracz2) {
+void UsunTablice(Konfiguracja* konfiguracja ,Gracz* gracz1, Gracz*gracz2) {
 	int i;
-	for (i = 0; i < ROZMIAR_POLA; i++) {
+	for (i = 0; i < konfiguracja->rozmiarPola_x; i++) {
 		free(gracz1->pole[i]);
 		free(gracz2->pole[i]);
 	}
@@ -623,12 +861,12 @@ void UsunTablice(Gracz* gracz1, Gracz*gracz2) {
 	free(gracz2->pole);
 }
 
-int Strzal(Gracz* atakowanyGracz, int pole) {
+int Strzal(Konfiguracja* konfiguracja, Gracz* atakowanyGracz, int pole) {
 	int x = pole / 10;
 	int y = pole % 10;
 
-	if (x<0 || x>=ROZMIAR_POLA || y<0 || y>=ROZMIAR_POLA) {
-		return ST_BLAD;
+	if (x<0 || x>=konfiguracja->rozmiarPola_x || y<0 || y>=konfiguracja->rozmiarPola_y) {
+		return konfiguracja->st_blad;
 	}
 
 	if (atakowanyGracz->pole[x][y] <=-3 && atakowanyGracz->pole[x][y]>=-9) { //-3 1-masztowiec, (-6)do(-4) 2-maszztowiec, (-8)do(-7) 3-maszztowiec, -9 4-maszztowiec
@@ -659,30 +897,29 @@ int Strzal(Gracz* atakowanyGracz, int pole) {
 		atakowanyGracz->pole[x][y] = -1;
 		
 		if (((atakowanyGracz->statki / pozycja) % 8 == 0) || pozycja== 01) {
-			return ST_ZATOP;
+			return konfiguracja->st_zatop;
 		}
-		return ST_CEL;
+		return konfiguracja->st_cel;
 	}
 	else if (atakowanyGracz->pole[x][y] < 0) {
-		return ST_BLAD; 
+		return konfiguracja->st_blad; 
 	}
 	else {
 		atakowanyGracz->pole[x][y] = -2; //pudlo
-		return ST_PUDLO;
+		return konfiguracja->st_pudlo;
 	}
 }
 
-int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
+int Bitwa(Konfiguracja(*konfiguracja), Rozgrywka(*rozgrywka)) {
 
-	WypiszRuchy(*ruchy);
-	DodajdoListy(ruchy, start, 0, 0);
+	WypiszRuchy(rozgrywka->ruchy);
+	DodajdoListy(&rozgrywka->ruchy, start, 0, 0);
 
 	printf("Oto twoje pole:\n");
-	RysujPlansze(*gracz1, 0);
+	RysujPlansze(konfiguracja,rozgrywka->gracz1, 0);
 	printf("Oto plansza przeciwnika:\n");
-	RysujPlansze(*gracz2, 1);
-	
-	
+	RysujPlansze(konfiguracja ,rozgrywka->gracz2, 1);
+
 	//pêtla do pobierania informacji. Jest z zawsze prawdziwym warunkiem aby jedyne co mog³o j¹ zatrzymaæ to zwrócenie wartoœæi funkcji
 	while (1) {
 		int cel,wynik;
@@ -690,8 +927,8 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 		do {
 			do {
 				cel = WprowadzZadanie(1);
-				if (cel == ZAD_ZAPISZ) {
-					if (Zapisz(*gracz1, *gracz2, xml,*ruchy)) {
+				if (cel == konfiguracja->zad_zapisz) {
+					if (Zapisz(konfiguracja,rozgrywka)) {
 						printf("Udany zapis\n");
 						printf("Gdzie strzelac: ");
 						
@@ -702,19 +939,19 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 					cel = -1;
 					continue;
 				}
-				if (cel == ZAD_COFNIJ) {
+				if (cel == konfiguracja->zad_cofnij) {
 					printf("Nie mozna teraz wykonac tej akcji.\nPodaj inna komende lub miejsce strzalu:");
 					cel = -1;
 				}
-				if (cel == ZAD_FLOTA) {
-					WypiszFlote(gracz2);
+				if (cel == konfiguracja->zad_flota) {
+					WypiszFlote(&rozgrywka->gracz2);
 					cel = -1;
 					printf("Gdzie strzelac: ");
 				}
-				if (cel == ZAD_WCZYTAJ) {
-					if (Wczytaj(gracz1, gracz2, xml,ruchy)){
+				if (cel == konfiguracja->zad_wczytaj) {
+					if (Wczytaj(konfiguracja,rozgrywka)){
 						printf("Udane wczytanie\n");
-						return B_WCZYTAJ;
+						return konfiguracja->b_wczytaj;
 						
 					}
 					else {
@@ -724,39 +961,41 @@ int Bitwa(Gracz* gracz1, Gracz* gracz2, mxml_node_t** xml, Historia** ruchy) {
 					continue;
 				}
 			} while (cel == -1);
-			wynik = Strzal(gracz2, cel / 100);
-			if (wynik == ST_BLAD) {
+			wynik = Strzal(konfiguracja,&rozgrywka->gracz2, cel / 100);
+			if (wynik == konfiguracja->st_blad) {
 				printf("W te pole nie mozna wycelowac. Podaj ponownie:");
 			}
-		}while (wynik == ST_BLAD);
+		}while (wynik == konfiguracja->st_blad);
 
 		if (wynik > 1) {
-			if (wynik == ST_CEL)
+			if (wynik == konfiguracja->st_cel)
 				printf("Trafiony!\n");
 			else
 				printf("Trafiony zatopiony!\n");
-			DodajdoListy(ruchy, strzal, cel / 100, 1);
-			RysujPlansze(*gracz2,1);
-			if (gracz2->statki == 0) {
-				return B_KONIEC;
+			DodajdoListy(&rozgrywka->ruchy, strzal, cel / 100, 1);
+			RysujPlansze(konfiguracja, rozgrywka->gracz2,1);
+			if (rozgrywka->gracz2.statki == 0) {
+				return konfiguracja->b_koniec;
 			}
 		}	
 
-		if (wynik == ST_PUDLO) {
+		if (wynik == konfiguracja->st_pudlo) {
 			printf("Pudlo :(\n");
-			DodajdoListy(ruchy, strzal, cel / 100, 0);
-			return B_NIEKONIEC;
+			DodajdoListy(&rozgrywka->ruchy, strzal, cel / 100, 0);
+			return konfiguracja->b_niekoniec;
 		}
 		
 	}
 }
 
 
-int Losuj(int poprzedniePole) {
-	return rand() % (ROZMIAR_POLA*ROZMIAR_POLA);
+int Losuj(Konfiguracja *konfiguracja, int poprzedniePole) {
+	int x = rand()% (konfiguracja->rozmiarPola_x);
+	int y = rand() % (konfiguracja->rozmiarPola_y);
+	return 10 * x + y;
 }
 
-int IdzN(int poprzedniePole) {
+int IdzN(Konfiguracja *konfiguracja, int poprzedniePole) {
 	int tymczasowa = poprzedniePole - 10;
 	if (tymczasowa / 10 < 0) {
 		return -1;
@@ -764,29 +1003,29 @@ int IdzN(int poprzedniePole) {
 	return tymczasowa;
 
 }
-int IdzS(int poprzedniePole) {
+int IdzS(Konfiguracja *konfiguracja, int poprzedniePole) {
 	int tymczasowa = poprzedniePole + 10;
-	if (tymczasowa / 10 >= ROZMIAR_POLA) {
+	if (tymczasowa / 10 >= konfiguracja->rozmiarPola_x) {
 		return -1;
 	}
 	return tymczasowa;
 }
-int IdzSkos(int poprzedniePole) {
+int IdzSkos(Konfiguracja *konfiguracja, int poprzedniePole) {
 	int tymczasowa = poprzedniePole + 11;
-	if (tymczasowa / 10 >= ROZMIAR_POLA || tymczasowa % 10 >= ROZMIAR_POLA) {
+	if (tymczasowa / 10 >= konfiguracja->rozmiarPola_x || tymczasowa % 10 >= konfiguracja->rozmiarPola_y) {
 		return -1;
 	}
 	return tymczasowa;
 }
-int IdzE(int poprzedniePole) {
+int IdzE(Konfiguracja *konfiguracja, int poprzedniePole) {
 	int tymczasowa = poprzedniePole + 1;
-	if (tymczasowa % 10 >= ROZMIAR_POLA) {
+	if (tymczasowa % 10 >= konfiguracja->rozmiarPola_y) {
 		return -1;
 	}
 	return tymczasowa;
 
 }
-int IdzW(int poprzedniePole) {
+int IdzW(Konfiguracja *konfiguracja, int poprzedniePole) {
 	int tymczasowa = poprzedniePole - 1;
 	if (tymczasowa % 10 < 0) {
 		return -1;
@@ -794,50 +1033,50 @@ int IdzW(int poprzedniePole) {
 	return tymczasowa;
 }
 
-int BitwaAI(Gracz* atakowanyGracz, Wybor* AI, Historia** ruchy) {
+int BitwaAI(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka, Wybor* AI) {
 	int wynik, cel;
 	do {
 		do{
 			if (AI->stanPoprzedni > 5) { //przechwytywanie osobliwych b³êdów w celowaniu
 				AI->stanPoprzedni = 0;
 			}
-			cel = AI->stan[AI->stanPoprzedni](AI->aktualnePole);
+			cel = AI->stan[AI->stanPoprzedni](konfiguracja,AI->aktualnePole);
 			AI->aktualnePole = cel;
 
 		} while (cel == -1 && AI->stanPoprzedni++);
-		wynik = Strzal(atakowanyGracz, cel);
-		if (wynik != ST_BLAD) {
-			DodajdoListy(ruchy, strzal, cel, wynik - 1);
+		wynik = Strzal(konfiguracja,&rozgrywka->gracz1, cel);
+		if (wynik != konfiguracja->st_blad) {
+			DodajdoListy(&rozgrywka->ruchy, strzal, cel, wynik - 1);
 		}
-		if (atakowanyGracz->statki == 0) {
-			return B_KONIEC;
+		if (rozgrywka->gracz1.statki == 0) {
+			return konfiguracja->b_koniec;
 		}
 		
-		if (wynik == ST_ZATOP) {//statek zosta³ zatopiony po strzle
+		if (wynik == konfiguracja->st_zatop) {//statek zosta³ zatopiony po strzle
 			AI->stanPoprzedni = 0;
 			continue;
 		}
-		if (wynik == ST_CEL && AI->stanPoprzedni==3 ) { // gdy celowano na skos i trafiono odrazu przechodzi siê do nastêpnego
+		if (wynik == konfiguracja->st_cel && AI->stanPoprzedni==3 ) { // gdy celowano na skos i trafiono odrazu przechodzi siê do nastêpnego
 			AI->stanPoprzedni++;
 			continue;
 		}
 		
 		if (AI->stanPoprzedni == 0) {
-			if (wynik == ST_CEL) {//trafiono, spróbuj znaleŸæ resztê statku
+			if (wynik == konfiguracja->st_cel) {//trafiono, spróbuj znaleŸæ resztê statku
 				AI->stanPoprzedni++;
 			}
 
 		}
 		else {
 
-			if (wynik == ST_PUDLO) { //podczas szukania zmienia siê kierunek tylko podczas nietrafienia
+			if (wynik == konfiguracja->st_pudlo) { //podczas szukania zmienia siê kierunek tylko podczas nietrafienia
 				AI->stanPoprzedni++;
 			}
 		}
 		
 		
-	} while (wynik != ST_PUDLO);
+	} while (wynik != konfiguracja->st_pudlo);
 	
-	return B_NIEKONIEC;
+	return konfiguracja->b_niekoniec;
 }
 

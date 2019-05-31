@@ -16,15 +16,15 @@ int PobierzParametry(int ileArg, char* arg[], Konfiguracja *konfiguracja) {
 	konfiguracja->trybGry = -1;
 	konfiguracja->automat = 0;
 	konfiguracja->wczytaj = 0;
+	konfiguracja->plikZapisu = strdup("Zapis.xml");
 	if (ileArg > 1) {
 		if (!strcmp(arg[1], "-l")) {
 			konfiguracja->wczytaj = 1;
 			if (ileArg > 2) {
+				free(konfiguracja->plikZapisu);
 				konfiguracja->plikZapisu = strdup(arg[2]);
 			}
-			else{
-				konfiguracja->plikZapisu = strdup("Zapis.xml");
-			}
+			
 		}
 		else if (!strcmp(arg[1], "-h")) {
 			konfiguracja->trybGry = 1;
@@ -45,6 +45,7 @@ int PobierzParametry(int ileArg, char* arg[], Konfiguracja *konfiguracja) {
 }
 
 int Skonfiguruj(Konfiguracja *konfiguracja) {
+	ZmienKolor(BIALY);
 	FILE* plikKonfiguracji = fopen("config.ini","r");
 	if (plikKonfiguracji == NULL) {
 		printf("Brak pliku konfiguracji");
@@ -120,7 +121,7 @@ void UstawParametry(Konfiguracja *konfiguracja) {
 	
 }
 
-int Iniciuj(Konfiguracja*konfiguracja, Rozgrywka* rozgrywka) {
+int Iniciuj(Konfiguracja*konfiguracja, Rozgrywka *rozgrywka) {
 	rozgrywka->xml = 0;
 	rozgrywka->ruchy = 0;
 	if (WypelnijTablice(konfiguracja,&rozgrywka->gracz1, &rozgrywka->gracz2) == 0) {
@@ -227,6 +228,7 @@ void GameLoopAI(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka) {
 		wynik2 = BitwaAI(konfiguracja,rozgrywka, &AI);
 		mxmlSetInteger(rozgrywka->tura_n, ++tura);
 	} while (wynik1 && wynik2);
+	ZakonczGre(konfiguracja, rozgrywka, wynik1);
 }
 
 void InicializujAI(Wybor* AI, Konfiguracja* konfiguracja) {
@@ -246,6 +248,25 @@ void InicializujAI(Wybor* AI, Konfiguracja* konfiguracja) {
 	AI->stan[3] = IdzSkos;
 	AI->stan[4] = IdzW;
 	AI->stan[5] = IdzE;
+}
+
+void ZakonczGre(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka, int wynik) {
+	if (wynik == konfiguracja->b_koniec) {
+		printf("Wygral pierwszy gracz");
+	}
+	else if (konfiguracja->trybGry == 1) {
+		printf("Wygral drugi gracz");
+	}
+	else
+	{
+		printf("Wygral Komputer");
+	}
+	free(konfiguracja->plikZapisu);
+	mxmlDelete(rozgrywka->xml);
+	UsunListe(&rozgrywka->ruchy);
+	UsunTablice(konfiguracja,&rozgrywka->gracz1, &rozgrywka->gracz2);
+	WyczyscBufor();
+	getchar();
 }
 
 
@@ -767,18 +788,20 @@ void Rozmieszczenie(Konfiguracja* konfiguracja, Gracz* gracz) {
 	printf("Twoje Pole: \n");
 	RysujPlansze(konfiguracja, *gracz, 0);
 	printf("Teraz nalezy umiescic statki.\n Nalezy podac pole oraz kierunek:\n 0-od lewej do prawej.\n 1-od gory do dolu.\n");
-
-
-	PobierzKoordynaty(konfiguracja, 4, gracz, &historia, -9);
-	PobierzKoordynaty(konfiguracja, 3, gracz, &historia, -8);
-	PobierzKoordynaty(konfiguracja, 3, gracz, &historia, -7);
-	PobierzKoordynaty(konfiguracja, 2, gracz, &historia, -6);
-	PobierzKoordynaty(konfiguracja, 2, gracz, &historia, -5);
-	PobierzKoordynaty(konfiguracja, 2, gracz, &historia, -4);
-	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
-	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
-	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
-	PobierzKoordynaty(konfiguracja, 1, gracz, &historia, -3);
+	int i, c, pole;
+	c = -9;
+	pole = konfiguracja->rozmiarPola_x * konfiguracja->rozmiarPola_y;
+	
+		PobierzKoordynaty(konfiguracja, 4, gracz, &historia, c++);
+	for (i = 0; i < (pole / 60)+1; i++, c++) {
+		PobierzKoordynaty(konfiguracja, 3, gracz, &historia, c);
+	}
+	for (i = 0; i < (pole / 30) + 1; i++, c++) {
+		PobierzKoordynaty(konfiguracja, 2, gracz, &historia, c);
+	}
+	for (i = 0; i < (pole / 26) + 1; i++) {
+		PobierzKoordynaty(konfiguracja, 1, gracz, &historia, c);
+	}
 
 
 	int komenda;
@@ -797,19 +820,40 @@ void Rozmieszczenie(Konfiguracja* konfiguracja, Gracz* gracz) {
 	UsunListe(&historia);
 }
 void AutoRozmieszczenie(Konfiguracja* konfiguracja, Gracz* gracz) {
-	gracz->statki = 04332224;
-	while (!UstawStatek(konfiguracja, gracz, 4, rand() % 100, rand() % 2, -9));
-	while (!UstawStatek(konfiguracja, gracz, 3, rand() % 100, rand() % 2, -8));
-	while (!UstawStatek(konfiguracja, gracz, 3, rand() % 100, rand() % 2, -7));
-	while (!UstawStatek(konfiguracja, gracz, 2, rand() % 100, rand() % 2, -6));
-	while (!UstawStatek(konfiguracja, gracz, 2, rand() % 100, rand() % 2, -5));
-	while (!UstawStatek(konfiguracja, gracz, 2, rand() % 100, rand() % 2, -4));
-	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
-	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
-	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
-	while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, -3));
+	gracz->statki = 0;
+	int i, c, pole;
+	c = -9;
+	pole = konfiguracja->rozmiarPola_x * konfiguracja->rozmiarPola_y;
+
+		while (!UstawStatek(konfiguracja, gracz, 4, rand() % 100, rand() % 2, c));
+		DodajdoFloty(gracz, c, 4);
+	for (i = 0, c=-8; i < (pole / 60) + 1; i++, c++) {
+		while (!UstawStatek(konfiguracja, gracz, 3, rand() % 100, rand() % 2, c));
+		DodajdoFloty(gracz, c, 3);
+	}
+	for (i = 0, c=-6; i < (pole / 30) + 1; i++, c++) {
+		while (!UstawStatek(konfiguracja, gracz, 2, rand() % 100, rand() % 2, c));
+		DodajdoFloty(gracz, c, 2);
+	}
+	for (i = 0, c=-3; i < (pole / 26) + 1; i++) {
+		while (!UstawStatek(konfiguracja, gracz, 1, rand() % 100, rand() % 2, c));
+		DodajdoFloty(gracz, c, 1);
+	}
 
 	Oczysc();
+}
+
+void DodajdoFloty(Gracz* gracz, int pozycja, int dlugosc) {
+	int mnoznik = 010;
+	int i;
+	for (i = 0; i < -4 - pozycja; i++) {
+		mnoznik *= 010;
+	}
+	if (pozycja == -3) {
+		mnoznik = 1;
+	}
+	
+	gracz->statki += dlugosc * mnoznik;
 }
 
 
@@ -910,7 +954,7 @@ int Strzal(Konfiguracja* konfiguracja, Gracz* atakowanyGracz, int pole) {
 	}
 }
 
-int Bitwa(Konfiguracja(*konfiguracja), Rozgrywka(*rozgrywka)) {
+int Bitwa(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka) {
 
 	WypiszRuchy(rozgrywka->ruchy);
 	DodajdoListy(&rozgrywka->ruchy, start, 0, 0);

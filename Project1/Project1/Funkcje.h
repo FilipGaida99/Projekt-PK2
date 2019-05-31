@@ -54,15 +54,6 @@ typedef struct {
 	int st_zatop;
 }Konfiguracja;
 
-typedef struct _Rozgrywka{
-	Gracz gracz1;
-	Gracz gracz2;
-	mxml_node_t* xml;
-	mxml_node_t* tura_n;
-	mxml_node_t* czyja_n;
-	Historia* ruchy;
-
-}Rozgrywka;
 
 /**struktura obs³uguj¹ca sztuczn¹ inteligencjê. */
 typedef struct {
@@ -86,15 +77,28 @@ typedef struct Lista{
 	struct Lista* pPoprzednia;
 }Historia;
 
+typedef struct _Rozgrywka {
+	Gracz gracz1;
+	Gracz gracz2;
+	mxml_node_t* xml;
+	mxml_node_t* tura_n;
+	mxml_node_t* czyja_n;
+	Historia* ruchy;
 
+}Rozgrywka;
 
 
 int PobierzParametry(int ileArg, char* arg[], Konfiguracja *konfiguracja);
 int Skonfiguruj(Konfiguracja *konfiguracja);
 void UstawParametry(Konfiguracja *konfiguracja);
-int Iniciuj(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka);
+int Iniciuj( Konfiguracja *konfiguracja,Rozgrywka *rozgrywka);
 void GameLoop(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka);
 void GameLoopAI(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka);
+void ZamianaGraczy(Rozgrywka* rozgrywka);
+void InicializujAI(Wybor* AI, Konfiguracja* konfiguracja);
+int PobierzKodowanie(Konfiguracja *konfiguracja);
+void DodajdoFloty(Gracz* gracz, int pozycja, int dlugosc);
+void ZakonczGre(Konfiguracja* konfiguracja, Rozgrywka* rozgrywka, int wynik);
 
 
 /**Funkcja czyszcz¹ca pozosta³oœci z bufora.*/
@@ -165,7 +169,7 @@ int Strzal(Konfiguracja* konfiguracja, Gracz* atakowanyGracz, int pole);
 @return 1 (B_NIEKONIEC) Informacja o tym, ¿e ka¿dy gracz ma jeszcze statki
 @return 2 (B_WCZYTAJ) Wartoœæ zwracana w przypadku udanego wcytania gry 
 */
-int Bitwa(Konfiguracja (*konfiguracja), Rozgrywka (*rozgrywka));
+int Bitwa(Konfiguracja *konfiguracja, Rozgrywka *rozgrywka);
 /**Funkcja czyszcz¹ca konsolê. Zabezpieczenie przed podgl¹daniem pól przeciwnika. W przyadku nieobs³ugiwanego systemu operacyjnego funkcja wypisze dostateczn¹ iloœæ nowych linii, aby gracze nie widzieli w swojej turze statków przeciwnika.
 */
 void Oczysc();

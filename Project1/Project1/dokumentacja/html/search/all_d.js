@@ -1,10 +1,9 @@
 var searchData=
 [
-  ['wczytaj',['Wczytaj',['../Funkcje_8h.html#a66f34b463dc19f1003b7f5c0f076da1d',1,'Funkcje.c']]],
-  ['wprowadzzadanie',['WprowadzZadanie',['../Funkcje_8h.html#a1a08160abc9e2621b2e81fa92880118f',1,'Funkcje.c']]],
-  ['wybor',['Wybor',['../structWybor.html',1,'']]],
-  ['wyczyscbufor',['WyczyscBufor',['../Funkcje_8h.html#a812971029754230ff400e251bdecac29',1,'Funkcje.c']]],
-  ['wypelnijtablice',['WypelnijTablice',['../Funkcje_8h.html#a84aa6a449c0f2d5ca7e6a88d414fe6db',1,'Funkcje.c']]],
-  ['wypiszflote',['WypiszFlote',['../Funkcje_8h.html#ac5c95fbf1f4e025d6ca9598e98771bd8',1,'Funkcje.c']]],
-  ['wypiszruchy',['WypiszRuchy',['../Funkcje_8h.html#ab9eac42cddbb3e9014ca1ff6b4cde999',1,'Funkcje.c']]]
+  ['ustawparametry',['UstawParametry',['../Funkcje_8h.html#a49b41f127dda964ce35081e57d6d01ab',1,'Funkcje.c']]],
+  ['ustawstatek',['UstawStatek',['../Funkcje_8h.html#a4b19210abccc186ca84935fa59cc9420',1,'Funkcje.c']]],
+  ['usunliste',['UsunListe',['../Funkcje_8h.html#a55cd579e7766f0d10670af83f6851329',1,'Funkcje.c']]],
+  ['usunstatek',['UsunStatek',['../Funkcje_8h.html#a312658f71f729f9ccd728839e7e3d87b',1,'Funkcje.c']]],
+  ['usuntablice',['UsunTablice',['../Funkcje_8h.html#a0f4b29691f14660e484cea2ba4d1a980',1,'Funkcje.c']]],
+  ['utworzzapis',['UtworzZapis',['../Funkcje_8h.html#a2e823455bca28190a5faa3594792e609',1,'Funkcje.c']]]
 ];

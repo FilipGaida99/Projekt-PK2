@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['bitwa',['Bitwa',['../Funkcje_8h.html#a513fa87c991a7f81624269af246e64c7',1,'Funkcje.c']]],
-  ['bitwaai',['BitwaAI',['../Funkcje_8h.html#a8ad43acf5f9af76986d68c76712f2bbe',1,'Funkcje.c']]]
+  ['bitwa',['Bitwa',['../Funkcje_8h.html#a672424c9678229c6eed9dbe1bf430571',1,'Funkcje.c']]],
+  ['bitwaai',['BitwaAI',['../Funkcje_8h.html#ac4bbafc8f2788d6d367808a394cbe357',1,'Funkcje.c']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wybor',['Wybor',['../structWybor.html',1,'']]]
+  ['lista',['Lista',['../structLista.html',1,'']]]
 ];

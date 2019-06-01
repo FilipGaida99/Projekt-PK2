@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['oczysc',['Oczysc',['../Funkcje_8h.html#a556e54452713fd9e0e46d22d656acd84',1,'Funkcje.c']]]
+  ['losuj',['Losuj',['../Funkcje_8h.html#a6d0e81f00fc6a1125ce65d58cd4a1bd3',1,'Funkcje.c']]]
 ];

@@ -1,143 +1,195 @@
 \begin{theindex}
 
   \item {Auto\+Rozmieszczenie}
-    \subitem {Funkcje.\+h}, \hyperpage{5}
+    \subitem {Funkcje.\+h}, \hyperpage{6}
 
   \indexspace
 
   \item {Bitwa}
-    \subitem {Funkcje.\+h}, \hyperpage{5}
+    \subitem {Funkcje.\+h}, \hyperpage{6}
   \item {Bitwa\+AI}
-    \subitem {Funkcje.\+h}, \hyperpage{6}
+    \subitem {Funkcje.\+h}, \hyperpage{7}
 
   \indexspace
 
+  \item {C\+:/\+Users/\+Ja/source/repos/\+Projekt-\/\+P\+K2/\+Project1/\+Project1/\+Funkcje.\+h}, 
+		\hyperpage{4}
+
+  \indexspace
+
+  \item {Dodajdo\+Floty}
+    \subitem {Funkcje.\+h}, \hyperpage{7}
   \item {Dodajdo\+Listy}
-    \subitem {Funkcje.\+h}, \hyperpage{6}
+    \subitem {Funkcje.\+h}, \hyperpage{7}
   \item {Dzialania}
-    \subitem {Funkcje.\+h}, \hyperpage{5}
+    \subitem {Funkcje.\+h}, \hyperpage{6}
 
   \indexspace
 
-  \item {Funkcje.\+h}, \hyperpage{3}
-    \subitem {Auto\+Rozmieszczenie}, \hyperpage{5}
-    \subitem {Bitwa}, \hyperpage{5}
-    \subitem {Bitwa\+AI}, \hyperpage{6}
-    \subitem {Dodajdo\+Listy}, \hyperpage{6}
-    \subitem {Dzialania}, \hyperpage{5}
-    \subitem {Historia}, \hyperpage{4}
-    \subitem {Idz\+Skos}, \hyperpage{8}
-    \subitem {IdzE}, \hyperpage{7}
-    \subitem {IdzN}, \hyperpage{7}
-    \subitem {IdzS}, \hyperpage{7}
-    \subitem {IdzW}, \hyperpage{8}
-    \subitem {Losuj}, \hyperpage{8}
-    \subitem {Oczysc}, \hyperpage{9}
-    \subitem {Pobierz\+Koordynaty}, \hyperpage{9}
-    \subitem {Rozmieszczenie}, \hyperpage{9}
-    \subitem {Rysuj\+Plansze}, \hyperpage{9}
-    \subitem {Strzal}, \hyperpage{10}
-    \subitem {Ustaw\+Statek}, \hyperpage{10}
-    \subitem {Usun\+Liste}, \hyperpage{11}
-    \subitem {Usun\+Statek}, \hyperpage{11}
-    \subitem {Usun\+Tablice}, \hyperpage{11}
-    \subitem {Utworz\+Zapis}, \hyperpage{12}
-    \subitem {Wczytaj}, \hyperpage{12}
-    \subitem {Wprowadz\+Zadanie}, \hyperpage{13}
-    \subitem {Wyczysc\+Bufor}, \hyperpage{13}
-    \subitem {Wypelnij\+Tablice}, \hyperpage{13}
-    \subitem {Wypisz\+Flote}, \hyperpage{14}
-    \subitem {Wypisz\+Ruchy}, \hyperpage{14}
-    \subitem {Zadanie}, \hyperpage{4}
-    \subitem {Zapisz}, \hyperpage{14}
-    \subitem {Zmien\+Kolor}, \hyperpage{15}
+  \item {Funkcje.\+h}
+    \subitem {Auto\+Rozmieszczenie}, \hyperpage{6}
+    \subitem {Bitwa}, \hyperpage{6}
+    \subitem {Bitwa\+AI}, \hyperpage{7}
+    \subitem {Dodajdo\+Floty}, \hyperpage{7}
+    \subitem {Dodajdo\+Listy}, \hyperpage{7}
+    \subitem {Dzialania}, \hyperpage{6}
+    \subitem {Game\+Loop}, \hyperpage{8}
+    \subitem {Game\+Loop\+AI}, \hyperpage{8}
+    \subitem {Historia}, \hyperpage{5}
+    \subitem {Idz\+Skos}, \hyperpage{10}
+    \subitem {IdzE}, \hyperpage{9}
+    \subitem {IdzN}, \hyperpage{9}
+    \subitem {IdzS}, \hyperpage{9}
+    \subitem {IdzW}, \hyperpage{10}
+    \subitem {Inicializuj\+AI}, \hyperpage{10}
+    \subitem {Iniciuj}, \hyperpage{11}
+    \subitem {Losuj}, \hyperpage{11}
+    \subitem {Oczysc}, \hyperpage{11}
+    \subitem {Pobierz\+Kodowanie}, \hyperpage{12}
+    \subitem {Pobierz\+Koordynaty}, \hyperpage{12}
+    \subitem {Pobierz\+Parametry}, \hyperpage{12}
+    \subitem {Rozmieszczenie}, \hyperpage{13}
+    \subitem {Rysuj\+Plansze}, \hyperpage{13}
+    \subitem {Skonfiguruj}, \hyperpage{14}
+    \subitem {Sprawdz\+Zgodnosc}, \hyperpage{14}
+    \subitem {Strzal}, \hyperpage{14}
+    \subitem {Ustaw\+Parametry}, \hyperpage{15}
+    \subitem {Ustaw\+Statek}, \hyperpage{15}
+    \subitem {Usun\+Liste}, \hyperpage{16}
+    \subitem {Usun\+Statek}, \hyperpage{16}
+    \subitem {Usun\+Tablice}, \hyperpage{16}
+    \subitem {Utworz\+Zapis}, \hyperpage{17}
+    \subitem {Wczytaj}, \hyperpage{17}
+    \subitem {Wczytaj\+Gracza}, \hyperpage{17}
+    \subitem {Wprowadz\+Zadanie}, \hyperpage{18}
+    \subitem {Wyczysc\+Bufor}, \hyperpage{18}
+    \subitem {Wypelnij\+Tablice}, \hyperpage{18}
+    \subitem {Wypisz\+Flote}, \hyperpage{19}
+    \subitem {Wypisz\+Ruchy}, \hyperpage{19}
+    \subitem {Zadanie}, \hyperpage{5}
+    \subitem {Zakoncz\+Gre}, \hyperpage{19}
+    \subitem {Zamiana\+Graczy}, \hyperpage{20}
+    \subitem {Zapisz}, \hyperpage{20}
+    \subitem {Zapisz\+Gracza}, \hyperpage{20}
+    \subitem {Zmien\+Kolor}, \hyperpage{21}
 
   \indexspace
 
+  \item {Game\+Loop}
+    \subitem {Funkcje.\+h}, \hyperpage{8}
+  \item {Game\+Loop\+AI}
+    \subitem {Funkcje.\+h}, \hyperpage{8}
   \item {Gracz}, \hyperpage{2}
 
   \indexspace
 
   \item {Historia}
-    \subitem {Funkcje.\+h}, \hyperpage{4}
+    \subitem {Funkcje.\+h}, \hyperpage{5}
 
   \indexspace
 
   \item {Idz\+Skos}
-    \subitem {Funkcje.\+h}, \hyperpage{8}
+    \subitem {Funkcje.\+h}, \hyperpage{10}
   \item {IdzE}
-    \subitem {Funkcje.\+h}, \hyperpage{7}
+    \subitem {Funkcje.\+h}, \hyperpage{9}
   \item {IdzN}
-    \subitem {Funkcje.\+h}, \hyperpage{7}
+    \subitem {Funkcje.\+h}, \hyperpage{9}
   \item {IdzS}
-    \subitem {Funkcje.\+h}, \hyperpage{7}
+    \subitem {Funkcje.\+h}, \hyperpage{9}
   \item {IdzW}
-    \subitem {Funkcje.\+h}, \hyperpage{8}
+    \subitem {Funkcje.\+h}, \hyperpage{10}
+  \item {Inicializuj\+AI}
+    \subitem {Funkcje.\+h}, \hyperpage{10}
+  \item {Iniciuj}
+    \subitem {Funkcje.\+h}, \hyperpage{11}
 
   \indexspace
 
-  \item {Lista}, \hyperpage{2}
+  \item {Konfiguracja}, \hyperpage{2}
+
+  \indexspace
+
+  \item {Lista}, \hyperpage{3}
   \item {Losuj}
-    \subitem {Funkcje.\+h}, \hyperpage{8}
+    \subitem {Funkcje.\+h}, \hyperpage{11}
 
   \indexspace
 
   \item {Oczysc}
-    \subitem {Funkcje.\+h}, \hyperpage{9}
-
-  \indexspace
-
-  \item {Pobierz\+Koordynaty}
-    \subitem {Funkcje.\+h}, \hyperpage{9}
-
-  \indexspace
-
-  \item {Rozmieszczenie}
-    \subitem {Funkcje.\+h}, \hyperpage{9}
-  \item {Rysuj\+Plansze}
-    \subitem {Funkcje.\+h}, \hyperpage{9}
-
-  \indexspace
-
-  \item {Strzal}
-    \subitem {Funkcje.\+h}, \hyperpage{10}
-
-  \indexspace
-
-  \item {Ustaw\+Statek}
-    \subitem {Funkcje.\+h}, \hyperpage{10}
-  \item {Usun\+Liste}
     \subitem {Funkcje.\+h}, \hyperpage{11}
-  \item {Usun\+Statek}
-    \subitem {Funkcje.\+h}, \hyperpage{11}
-  \item {Usun\+Tablice}
-    \subitem {Funkcje.\+h}, \hyperpage{11}
-  \item {Utworz\+Zapis}
+
+  \indexspace
+
+  \item {Pobierz\+Kodowanie}
     \subitem {Funkcje.\+h}, \hyperpage{12}
+  \item {Pobierz\+Koordynaty}
+    \subitem {Funkcje.\+h}, \hyperpage{12}
+  \item {Pobierz\+Parametry}
+    \subitem {Funkcje.\+h}, \hyperpage{12}
+
+  \indexspace
+
+  \item {Rozgrywka}, \hyperpage{3}
+  \item {Rozmieszczenie}
+    \subitem {Funkcje.\+h}, \hyperpage{13}
+  \item {Rysuj\+Plansze}
+    \subitem {Funkcje.\+h}, \hyperpage{13}
+
+  \indexspace
+
+  \item {Skonfiguruj}
+    \subitem {Funkcje.\+h}, \hyperpage{14}
+  \item {Sprawdz\+Zgodnosc}
+    \subitem {Funkcje.\+h}, \hyperpage{14}
+  \item {Strzal}
+    \subitem {Funkcje.\+h}, \hyperpage{14}
+
+  \indexspace
+
+  \item {Ustaw\+Parametry}
+    \subitem {Funkcje.\+h}, \hyperpage{15}
+  \item {Ustaw\+Statek}
+    \subitem {Funkcje.\+h}, \hyperpage{15}
+  \item {Usun\+Liste}
+    \subitem {Funkcje.\+h}, \hyperpage{16}
+  \item {Usun\+Statek}
+    \subitem {Funkcje.\+h}, \hyperpage{16}
+  \item {Usun\+Tablice}
+    \subitem {Funkcje.\+h}, \hyperpage{16}
+  \item {Utworz\+Zapis}
+    \subitem {Funkcje.\+h}, \hyperpage{17}
 
   \indexspace
 
   \item {Wczytaj}
-    \subitem {Funkcje.\+h}, \hyperpage{12}
+    \subitem {Funkcje.\+h}, \hyperpage{17}
+  \item {Wczytaj\+Gracza}
+    \subitem {Funkcje.\+h}, \hyperpage{17}
   \item {Wprowadz\+Zadanie}
-    \subitem {Funkcje.\+h}, \hyperpage{13}
-  \item {Wybor}, \hyperpage{3}
+    \subitem {Funkcje.\+h}, \hyperpage{18}
+  \item {Wybor}, \hyperpage{4}
   \item {Wyczysc\+Bufor}
-    \subitem {Funkcje.\+h}, \hyperpage{13}
+    \subitem {Funkcje.\+h}, \hyperpage{18}
   \item {Wypelnij\+Tablice}
-    \subitem {Funkcje.\+h}, \hyperpage{13}
+    \subitem {Funkcje.\+h}, \hyperpage{18}
   \item {Wypisz\+Flote}
-    \subitem {Funkcje.\+h}, \hyperpage{14}
+    \subitem {Funkcje.\+h}, \hyperpage{19}
   \item {Wypisz\+Ruchy}
-    \subitem {Funkcje.\+h}, \hyperpage{14}
+    \subitem {Funkcje.\+h}, \hyperpage{19}
 
   \indexspace
 
   \item {Zadanie}
-    \subitem {Funkcje.\+h}, \hyperpage{4}
+    \subitem {Funkcje.\+h}, \hyperpage{5}
+  \item {Zakoncz\+Gre}
+    \subitem {Funkcje.\+h}, \hyperpage{19}
+  \item {Zamiana\+Graczy}
+    \subitem {Funkcje.\+h}, \hyperpage{20}
   \item {Zapisz}
-    \subitem {Funkcje.\+h}, \hyperpage{14}
+    \subitem {Funkcje.\+h}, \hyperpage{20}
+  \item {Zapisz\+Gracza}
+    \subitem {Funkcje.\+h}, \hyperpage{20}
   \item {Zmien\+Kolor}
-    \subitem {Funkcje.\+h}, \hyperpage{15}
+    \subitem {Funkcje.\+h}, \hyperpage{21}
 
 \end{theindex}

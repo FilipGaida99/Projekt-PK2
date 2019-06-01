@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['rozmieszczenie',['Rozmieszczenie',['../Funkcje_8h.html#a8e13d12acf4bd5dc9ccc7bc10b903ea8',1,'Funkcje.c']]],
-  ['rysujplansze',['RysujPlansze',['../Funkcje_8h.html#af63ea4764dbf6516e2f6c874205a53c3',1,'Funkcje.c']]]
+  ['pobierzkodowanie',['PobierzKodowanie',['../Funkcje_8h.html#ae1a2354d5ad345078b5d7c11c5a09cdc',1,'Funkcje.c']]],
+  ['pobierzkoordynaty',['PobierzKoordynaty',['../Funkcje_8h.html#a08bcec0aadfd56d4c1d403fc9266d4d2',1,'Funkcje.c']]],
+  ['pobierzparametry',['PobierzParametry',['../Funkcje_8h.html#a60c3a404005813fed0efca8863c483bf',1,'Funkcje.c']]]
 ];

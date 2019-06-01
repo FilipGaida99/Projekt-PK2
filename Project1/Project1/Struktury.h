@@ -6,10 +6,10 @@
 
 /**typ wyliczeniowy okreœlaj¹cy jaka czynnoœæ zosta³a wykonana. */
 typedef enum Dzialania { start, ustaw, strzal }Zadanie;
-
+/*Typ wyliczeniuowy okreœlaj¹cy kolor dla funckji ZmienKolor*/
 typedef enum { zielony = 10, niebieski, czerwony, bialy = 15 }Kolor;
 
-//Struktura przechowuj¹ca konfiguracje gry oraz kodowanie wartoœci zwracanej przez funkcje
+/**Struktura przechowuj¹ca konfiguracje gry oraz kodowanie wartoœci zwracanej przez funkcje*/
 typedef struct  {
 	//Ustawienia gry
 	int trybGry;
@@ -69,7 +69,7 @@ typedef struct Lista {
 	//WskaŸnik na poprzedni element w liœcie
 	struct Lista* pPoprzednia;
 }Historia;
-//Struktura przechowuj¹c informacje o obecnej rozgrywce
+/**Struktura przechowuj¹c informacje o obecnej rozgrywce*/
 typedef struct {
 	Gracz gracz1;
 	Gracz gracz2;

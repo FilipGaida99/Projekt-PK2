@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "Struktury.h"
 #include "Interface.h"
+#include "Logika.h"
+#include "AI.h"
+#include "Zapis.h"
 
 
 void WyczyscBufor() {
